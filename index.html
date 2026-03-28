@@ -89,8 +89,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .dp-color{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s;}
 .dp-color:hover{border-color:var(--text2);}
 .dp-color.active{border-color:var(--accent);}
-.tb-btn.draw-active{background:var(--accent) !important;color:#fff;}
-.tb-btn.draw-active svg{stroke:#fff;}
+.tb-btn.tool-active{background:var(--accent) !important;color:#fff;}
+.tb-btn.tool-active svg{stroke:#fff;}
+.tb-btn-group{position:relative;width:40px;height:40px;}
+.tb-btn-group .tb-btn{width:100%;height:100%;}
+.tb-dropdown-arrow{position:absolute;bottom:3px;right:3px;width:0;height:0;border-left:3px solid transparent;
+  border-right:3px solid transparent;border-top:4px solid var(--text2);pointer-events:none;}
+.tb-btn.tool-active+.tb-dropdown-arrow{border-top-color:#fff;}
+#arrow-dropdown{position:absolute;right:48px;background:var(--sidebar-bg);border:1px solid var(--border);
+  border-radius:8px;padding:4px;z-index:25;display:none;min-width:150px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+#arrow-dropdown .ctx-item{display:flex;align-items:center;gap:8px;}
+#arrow-dropdown .ctx-item svg{width:18px;height:18px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+#arrow-dropdown .ctx-item.selected{background:var(--item-sel);}
 
 /* ─── Context Menu ─── */
 #ctx-menu{position:fixed;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:8px;
@@ -103,6 +113,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   border-radius:8px;padding:4px;min-width:120px;box-shadow:0 8px 24px rgba(0,0,0,.5);max-height:300px;overflow-y:auto;}
 .ctx-item.has-sub:hover>.ctx-sub{display:block;}
 .ctx-color-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+.ctx-icon{width:14px;height:14px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+  display:inline-block;vertical-align:middle;margin-right:8px;flex-shrink:0;}
+.ctx-item{display:flex;align-items:center;}
 
 /* ─── Modal ─── */
 #modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;
@@ -147,10 +160,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div id="empty-label">Selecciona o crea un board para comenzar</div>
   <div id="toolbar" style="display:none">
     <div id="toolbar-panel" style="display:none">
+      <button class="tb-btn tool-active" id="move-btn" title="Mover (V)" onclick="app.setTool('move')"><svg viewBox="0 0 20 20"><path d="M4 16L7 4l4 8 4-3-1 9z" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
       <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><polyline points="3,13 7,9 10,11 13,7 17,13"/><circle cx="13" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.setTool('draw')"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
+      <div class="tb-btn-group">
+        <button class="tb-btn" id="arrow-btn" title="Flecha (A)" onclick="app.setTool('arrow')" oncontextmenu="event.preventDefault();app.showArrowDropdown(event)"><svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="16" y2="4"/><polyline points="10,4 16,4 16,10"/></svg></button>
+        <div class="tb-dropdown-arrow" onclick="app.showArrowDropdown(event)"></div>
+      </div>
       <button class="tb-btn" title="Exportar (E)" onclick="app.promptExport()"><svg viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="13"/><polyline points="6,7 10,4 14,7"/><polyline points="4,16 4,14"/><line x1="4" y1="16" x2="16" y2="16"/><polyline points="16,16 16,14"/></svg></button>
-      <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.toggleDrawing()"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
       <div class="tb-sep"></div>
       <button class="tb-btn" title="Centrar Todo (F)" onclick="app.fitAll()"><svg viewBox="0 0 20 20"><rect x="4" y="4" width="12" height="12" rx="1"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" title="Alejar (Ctrl+-)" onclick="app.zoomOut()"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/><line x1="6.5" y1="9" x2="11.5" y2="9"/></svg></button>
@@ -172,6 +190,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div class="dp-colors" id="draw-colors"></div>
 </div>
 
+<!-- ═══ Arrow Dropdown ═══ -->
+<div id="arrow-dropdown"></div>
+
 <!-- ═══ Context Menu ═══ -->
 <div id="ctx-menu"></div>
 
@@ -189,6 +210,18 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 // ═══════════════════════════════════════════════════════════════
 const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});
+
+// SVG icons for context menus
+const CTX_ICONS = {
+  trash:  '<svg class="ctx-icon" viewBox="0 0 16 16"><polyline points="3,4 4,14 12,14 13,4"/><line x1="2" y1="4" x2="14" y2="4"/><path d="M6 4V3a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v1"/></svg>',
+  front:  '<svg class="ctx-icon" viewBox="0 0 16 16"><rect x="5" y="2" width="8" height="8" rx="1"/><rect x="3" y="6" width="8" height="8" rx="1"/></svg>',
+  back:   '<svg class="ctx-icon" viewBox="0 0 16 16"><rect x="3" y="6" width="8" height="8" rx="1"/><rect x="5" y="2" width="8" height="8" rx="1"/></svg>',
+  reset:  '<svg class="ctx-icon" viewBox="0 0 16 16"><path d="M4 8a4 4 0 1 1 1 3"/><polyline points="2,7 4,10 7,8"/></svg>',
+  edit:   '<svg class="ctx-icon" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z"/></svg>',
+  font:   '<svg class="ctx-icon" viewBox="0 0 16 16"><line x1="4" y1="5" x2="12" y2="5"/><line x1="8" y1="5" x2="8" y2="13"/></svg>',
+  palette:'<svg class="ctx-icon" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><circle cx="6" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="6" r="1" fill="currentColor" stroke="none"/><circle cx="6" cy="10" r="1" fill="currentColor" stroke="none"/></svg>',
+  rename: '<svg class="ctx-icon" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z"/></svg>',
+};
 
 const COLORS_TEXT = [
   {name:'Blanco',hex:'#e0e0e0'},{name:'Rojo',hex:'#e05555'},{name:'Naranja',hex:'#e09050'},
@@ -237,9 +270,13 @@ class App {
     this._panning = false;
     this._panStart = {x:0,y:0};
     this._autoSaveTimer = null;
-    this._drawingMode = false;
+    this._activeTool = 'move'; // 'move' | 'draw' | 'arrow'
     this._drawColor = '#e0e0e0';
     this._drawSize = 3;
+    this._arrowType = 'straight'; // 'straight' | 'curved'
+    this._arrowStart = null;
+    this._arrowPreview = null;
+    this._spaceHeld = false;
   }
 
   async init(){
@@ -331,8 +368,29 @@ class App {
         this.showContextMenu(e.clientX, e.clientY, target);
         return;
       }
-      // Middle button or left on empty → pan (skip if drawing)
-      if(e.button===1 || (e.button===0 && !opt.target && !this._drawingMode)){
+      // Space+click → pan (any tool, like Photoshop)
+      if(e.button===0 && this._spaceHeld){
+        this._panning = true;
+        this._panStart = {x:e.clientX, y:e.clientY};
+        c.selection = false;
+        c.defaultCursor = 'grabbing';
+        c.setCursor('grabbing');
+        return;
+      }
+      // Arrow tool: click to place points
+      if(e.button===0 && this._activeTool === 'arrow'){
+        const pointer = c.getPointer(e);
+        if(!this._arrowStart){
+          this._arrowStart = {x:pointer.x, y:pointer.y};
+        } else {
+          this.createArrow(this._arrowStart.x, this._arrowStart.y, pointer.x, pointer.y, this._arrowType);
+          if(this._arrowPreview){ c.remove(this._arrowPreview); this._arrowPreview=null; }
+          this._arrowStart = null;
+        }
+        return;
+      }
+      // Middle button or left on empty → pan
+      if(e.button===1 || (e.button===0 && !opt.target && this._activeTool === 'move')){
         this._panning = true;
         this._panStart = {x:e.clientX, y:e.clientY};
         c.selection = false;
@@ -350,14 +408,24 @@ class App {
         this._panStart = {x:e.clientX, y:e.clientY};
         c.requestRenderAll();
       }
+      // Arrow preview
+      if(this._activeTool === 'arrow' && this._arrowStart){
+        const pointer = c.getPointer(opt.e);
+        this._createArrowPreview(this._arrowStart.x, this._arrowStart.y, pointer.x, pointer.y);
+      }
     });
 
     c.on('mouse:up', ()=>{
       if(this._panning){
         this._panning = false;
-        c.selection = true;
-        c.defaultCursor = 'default';
-        c.setCursor('default');
+        if(this._activeTool === 'move'){
+          c.selection = true;
+          c.defaultCursor = 'default';
+          c.setCursor('default');
+        } else if(this._activeTool === 'arrow'){
+          c.defaultCursor = 'crosshair';
+          c.setCursor('crosshair');
+        }
       }
     });
 
@@ -431,19 +499,46 @@ class App {
       const ctrl = e.ctrlKey || e.metaKey;
 
       if(!editing){
+        if(e.key==='v'||e.key==='V'){e.preventDefault(); this.setTool('move'); return;}
         if(e.key==='t'||e.key==='T'){e.preventDefault(); this.addText(); return;}
         if(e.key==='i'||e.key==='I'){e.preventDefault(); this.addImage(); return;}
         if(e.key==='e'||e.key==='E'){e.preventDefault(); this.promptExport(); return;}
-        if(e.key==='d'||e.key==='D'){e.preventDefault(); this.toggleDrawing(); return;}
+        if(e.key==='d'||e.key==='D'){e.preventDefault(); this.setTool('draw'); return;}
+        if(e.key==='a'||e.key==='A'){e.preventDefault(); this.setTool('arrow'); return;}
         if(e.key==='f'||e.key==='F'){e.preventDefault(); this.fitAll(); return;}
         if(e.key==='Delete'||e.key==='Backspace'){this.deleteSelected(); return;}
-        if(e.key==='Escape' && this._drawingMode){e.preventDefault(); this.toggleDrawing(); return;}
+        if(e.key==='Escape'){e.preventDefault(); this._cancelArrow(); this.setTool('move'); return;}
       }
       if(ctrl && e.key==='='){e.preventDefault(); this.zoomIn(); return;}
       if(ctrl && e.key==='-'){e.preventDefault(); this.zoomOut(); return;}
       if(ctrl && e.key==='0'){e.preventDefault(); this.zoomReset(); return;}
       if(ctrl && (e.key==='s'||e.key==='S')){e.preventDefault(); this.saveCurrentBoard(); return;}
       if(ctrl && (e.key==='n'||e.key==='N')){e.preventDefault(); this.promptNewBoard(); return;}
+      // Space held → grab cursor for pan
+      if(e.key===' ' && !editing){
+        e.preventDefault();
+        if(!this._spaceHeld){
+          this._spaceHeld = true;
+          this.canvas.defaultCursor = 'grab';
+          this.canvas.setCursor('grab');
+          if(this._activeTool === 'draw') this.canvas.isDrawingMode = false;
+        }
+      }
+    });
+    document.addEventListener('keyup', e=>{
+      if(e.key===' ' && this._spaceHeld){
+        this._spaceHeld = false;
+        if(this._activeTool === 'move'){
+          this.canvas.defaultCursor = 'default';
+          this.canvas.setCursor('default');
+        } else if(this._activeTool === 'draw'){
+          this.canvas.isDrawingMode = true;
+          this.canvas.defaultCursor = 'crosshair';
+        } else if(this._activeTool === 'arrow'){
+          this.canvas.defaultCursor = 'crosshair';
+          this.canvas.setCursor('crosshair');
+        }
+      }
     });
   }
 
@@ -608,6 +703,8 @@ class App {
           this.loadTextItem(item);
         } else if(item.type === 'path'){
           this.loadPathItem(item);
+        } else if(item.type === 'arrow'){
+          this.loadArrowItem(item);
         }
       }catch(e){console.error('Error loading item:',e);}
     }
@@ -661,6 +758,17 @@ class App {
     this.canvas.add(p);
   }
 
+  loadArrowItem(item){
+    const arrow = this.createArrow(item.x1||0, item.y1||0, item.x2||100, item.y2||100, item.arrowType||'straight');
+    if(item.stroke) arrow.set('stroke', item.stroke);
+    if(item.strokeWidth) arrow.set('strokeWidth', item.strokeWidth);
+    if(item.scaleX) arrow.set('scaleX', item.scaleX);
+    if(item.scaleY) arrow.set('scaleY', item.scaleY);
+    arrow.set({left: item.x||arrow.left, top: item.y||arrow.top});
+    arrow.itemId = item.id || arrow.itemId;
+    arrow.setCoords();
+  }
+
   // ─── Serialization ───
   serializeItems(){
     const items = [];
@@ -682,7 +790,18 @@ class App {
           color: obj.fill,
           bg_color: obj.textBackgroundColor || 'transparent'
         });
-      } else if(obj.type === 'path'){
+      } else if(obj.type === 'path' && obj._arrowData){
+        items.push({
+          type:'arrow', id: obj.itemId||uuid(),
+          x:obj.left, y:obj.top, z:idx,
+          arrowType: obj._arrowData.type,
+          x1:obj._arrowData.x1, y1:obj._arrowData.y1,
+          x2:obj._arrowData.x2, y2:obj._arrowData.y2,
+          stroke: obj.stroke, strokeWidth: obj.strokeWidth,
+          scaleX: obj.scaleX, scaleY: obj.scaleY
+        });
+      } else if(obj.type === 'path' && !obj._arrowData){
+        if(obj === this._arrowPreview) return; // skip preview
         items.push({
           type:'path', id: obj.itemId||uuid(),
           x:obj.left, y:obj.top, z:idx,
@@ -957,7 +1076,11 @@ class App {
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="5" x2="13" y2="5"/><line x1="8" y1="5" x2="8" y2="13"/></svg>';
         const txt = obj.text.replace(/\n/g,' ');
         label = txt.length > 15 ? txt.substr(0,15)+'...' : txt;
+      } else if(obj.type === 'path' && obj._arrowData){
+        icon = '<svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="8,3 13,3 13,8"/></svg>';
+        label = 'Flecha '+(i+1);
       } else if(obj.type === 'path'){
+        if(obj === this._arrowPreview) return; // skip preview
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z" fill="none"/></svg>';
         label = 'Dibujo '+(i+1);
       } else return;
@@ -990,20 +1113,20 @@ class App {
     menu.innerHTML = '';
 
     if(target && target.type === 'image'){
-      this.addCtxItem(menu,'🗑  Eliminar imagen',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();});
-      this.addCtxItem(menu,'⬆  Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();});
-      this.addCtxItem(menu,'⬇  Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'Eliminar imagen',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();},false,CTX_ICONS.trash);
+      this.addCtxItem(menu,'Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();},false,CTX_ICONS.front);
+      this.addCtxItem(menu,'Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();},false,CTX_ICONS.back);
       menu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-sep'}));
-      this.addCtxItem(menu,'↺  Tamano original',()=>{target.set({scaleX:1,scaleY:1});this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'Tamano original',()=>{target.set({scaleX:1,scaleY:1});this.canvas.requestRenderAll();},false,CTX_ICONS.reset);
     } else if(target && target.type === 'i-text'){
-      this.addCtxItem(menu,'✏  Editar texto',()=>{this.canvas.setActiveObject(target);target.enterEditing();});
-      this.addCtxItem(menu,'🗑  Eliminar texto',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();});
-      this.addCtxItem(menu,'⬆  Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();});
-      this.addCtxItem(menu,'⬇  Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'Editar texto',()=>{this.canvas.setActiveObject(target);target.enterEditing();},false,CTX_ICONS.edit);
+      this.addCtxItem(menu,'Eliminar texto',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();},false,CTX_ICONS.trash);
+      this.addCtxItem(menu,'Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();},false,CTX_ICONS.front);
+      this.addCtxItem(menu,'Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();},false,CTX_ICONS.back);
       menu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-sep'}));
 
       // Font size submenu
-      const sizeItem = this.addCtxItem(menu,'🔤  Tamano de fuente',null,true);
+      const sizeItem = this.addCtxItem(menu,'Tamano de fuente',null,true,CTX_ICONS.font);
       const sizeSub = document.createElement('div');
       sizeSub.className = 'ctx-sub';
       FONT_SIZES.forEach(s=>{
@@ -1012,7 +1135,7 @@ class App {
       sizeItem.appendChild(sizeSub);
 
       // Color submenu
-      const colorItem = this.addCtxItem(menu,'🎨  Color de texto',null,true);
+      const colorItem = this.addCtxItem(menu,'Color de texto',null,true,CTX_ICONS.palette);
       const colorSub = document.createElement('div');
       colorSub.className = 'ctx-sub';
       COLORS_TEXT.forEach(c=>{
@@ -1021,13 +1144,14 @@ class App {
       });
       colorItem.appendChild(colorSub);
     } else if(target && target.type === 'path'){
-      this.addCtxItem(menu,'🗑  Eliminar dibujo',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();});
-      this.addCtxItem(menu,'⬆  Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();});
-      this.addCtxItem(menu,'⬇  Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();});
+      const isArrow = !!target._arrowData;
+      this.addCtxItem(menu,'Eliminar '+(isArrow?'flecha':'dibujo'),()=>{this.canvas.remove(target);this.canvas.requestRenderAll();},false,CTX_ICONS.trash);
+      this.addCtxItem(menu,'Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();},false,CTX_ICONS.front);
+      this.addCtxItem(menu,'Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();},false,CTX_ICONS.back);
       menu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-sep'}));
 
       // Stroke color submenu
-      const colorItem = this.addCtxItem(menu,'🎨  Color del trazo',null,true);
+      const colorItem = this.addCtxItem(menu,'Color del trazo',null,true,CTX_ICONS.palette);
       const colorSub = document.createElement('div');
       colorSub.className = 'ctx-sub';
       COLORS_TEXT.forEach(c=>{
@@ -1056,17 +1180,17 @@ class App {
   showBoardContextMenu(x,y,boardId){
     const menu = document.getElementById('ctx-menu');
     menu.innerHTML='';
-    this.addCtxItem(menu,'✏  Renombrar',()=>this.promptRename(boardId));
-    this.addCtxItem(menu,'🗑  Eliminar',()=>this.deleteBoard(boardId));
+    this.addCtxItem(menu,'Renombrar',()=>this.promptRename(boardId),false,CTX_ICONS.rename);
+    this.addCtxItem(menu,'Eliminar',()=>this.deleteBoard(boardId),false,CTX_ICONS.trash);
     menu.style.left=x+'px'; menu.style.top=y+'px'; menu.style.display='block';
     const close=e=>{if(!menu.contains(e.target)){menu.style.display='none';document.removeEventListener('mousedown',close);}};
     setTimeout(()=>document.addEventListener('mousedown',close),0);
   }
 
-  addCtxItem(parent, label, action, hasSub=false){
+  addCtxItem(parent, label, action, hasSub=false, icon=''){
     const div = document.createElement('div');
     div.className = 'ctx-item' + (hasSub?' has-sub':'');
-    div.textContent = label;
+    div.innerHTML = (icon||'') + '<span>'+label+'</span>';
     if(action){
       div.onclick = e=>{
         e.stopPropagation();
@@ -1078,26 +1202,172 @@ class App {
     return div;
   }
 
-  // ─── Drawing ───
-  toggleDrawing(){
-    if(!this.currentBoardId) return;
-    this._drawingMode = !this._drawingMode;
+  // ─── Tool System ───
+  setTool(tool){
+    if(!this.currentBoardId && tool !== 'move') return;
+    const prev = this._activeTool;
+    if(prev === tool && tool !== 'move') { this.setTool('move'); return; } // toggle off
+
+    // Deactivate previous tool
+    this._deactivateTool(prev);
+    this._activeTool = tool;
+
+    // Activate new tool
     const c = this.canvas;
-    const btn = document.getElementById('draw-btn');
-    const panel = document.getElementById('draw-panel');
-    if(this._drawingMode){
+    document.querySelectorAll('#move-btn,#draw-btn,#arrow-btn').forEach(b=>b.classList.remove('tool-active'));
+
+    if(tool === 'move'){
+      c.isDrawingMode = false;
+      c.selection = true;
+      c.defaultCursor = 'default';
+      document.getElementById('move-btn').classList.add('tool-active');
+    } else if(tool === 'draw'){
       c.isDrawingMode = true;
       c.freeDrawingBrush = new fabric.PencilBrush(c);
       c.freeDrawingBrush.color = this._drawColor;
       c.freeDrawingBrush.width = this._drawSize;
-      btn.classList.add('draw-active');
-      panel.style.display = 'block';
+      document.getElementById('draw-btn').classList.add('tool-active');
+      document.getElementById('draw-panel').style.display = 'block';
       this.initDrawColors();
-    } else {
+    } else if(tool === 'arrow'){
       c.isDrawingMode = false;
-      btn.classList.remove('draw-active');
-      panel.style.display = 'none';
+      c.selection = false;
+      c.defaultCursor = 'crosshair';
+      c.setCursor('crosshair');
+      document.getElementById('arrow-btn').classList.add('tool-active');
     }
+  }
+
+  _deactivateTool(tool){
+    const c = this.canvas;
+    if(tool === 'draw'){
+      c.isDrawingMode = false;
+      document.getElementById('draw-panel').style.display = 'none';
+    } else if(tool === 'arrow'){
+      this._cancelArrow();
+      c.selection = true;
+      c.defaultCursor = 'default';
+    }
+  }
+
+  toggleDrawing(){ this.setTool(this._activeTool === 'draw' ? 'move' : 'draw'); }
+
+  // ─── Arrow Tool ───
+  showArrowDropdown(e){
+    e.preventDefault(); e.stopPropagation();
+    const dd = document.getElementById('arrow-dropdown');
+    dd.innerHTML = '';
+    const types = [
+      {id:'straight', label:'Flecha recta', svg:'<svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="16" y2="4"/><polyline points="10,4 16,4 16,10"/></svg>'},
+      {id:'curved', label:'Flecha curva', svg:'<svg viewBox="0 0 20 20"><path d="M4 16 Q4 4 16 4" fill="none"/><polyline points="10,4 16,4 16,10"/></svg>'}
+    ];
+    types.forEach(t=>{
+      const div = document.createElement('div');
+      div.className = 'ctx-item' + (this._arrowType===t.id?' selected':'');
+      div.innerHTML = t.svg + t.label;
+      div.onclick = ()=>{ this._arrowType = t.id; dd.style.display='none'; this.setTool('arrow'); };
+      dd.appendChild(div);
+    });
+    // Position near the arrow button
+    const btn = document.getElementById('arrow-btn');
+    const rect = btn.getBoundingClientRect();
+    dd.style.left = (rect.left - 160)+'px';
+    dd.style.top = rect.top+'px';
+    dd.style.display = 'block';
+    const close = ev=>{ if(!dd.contains(ev.target)){ dd.style.display='none'; document.removeEventListener('mousedown',close); }};
+    setTimeout(()=>document.addEventListener('mousedown',close),0);
+  }
+
+  _cancelArrow(){
+    if(this._arrowPreview){
+      this.canvas.remove(this._arrowPreview);
+      this._arrowPreview = null;
+    }
+    this._arrowStart = null;
+  }
+
+  createArrow(x1, y1, x2, y2, type){
+    const headLen = 12;
+    const color = this._drawColor;
+    let pathStr, group;
+
+    if(type === 'straight'){
+      const angle = Math.atan2(y2-y1, x2-x1);
+      // Arrow line + head
+      const hx1 = x2 - headLen * Math.cos(angle - Math.PI/6);
+      const hy1 = y2 - headLen * Math.sin(angle - Math.PI/6);
+      const hx2 = x2 - headLen * Math.cos(angle + Math.PI/6);
+      const hy2 = y2 - headLen * Math.sin(angle + Math.PI/6);
+      pathStr = `M ${x1} ${y1} L ${x2} ${y2} M ${hx1} ${hy1} L ${x2} ${y2} L ${hx2} ${hy2}`;
+    } else {
+      // Curved arrow: quadratic bezier
+      const mx = (x1+x2)/2, my = (y1+y2)/2;
+      const dx = x2-x1, dy = y2-y1;
+      const dist = Math.sqrt(dx*dx+dy*dy);
+      const offset = dist * 0.25;
+      // Perpendicular direction
+      const nx = -dy/dist, ny = dx/dist;
+      const cx = mx + nx*offset, cy = my + ny*offset;
+      // Tangent at endpoint for arrowhead direction
+      // For Q bezier: tangent at t=1 is direction from control to end
+      const tx = x2-cx, ty = y2-cy;
+      const ta = Math.atan2(ty, tx);
+      const hx1 = x2 - headLen * Math.cos(ta - Math.PI/6);
+      const hy1 = y2 - headLen * Math.sin(ta - Math.PI/6);
+      const hx2 = x2 - headLen * Math.cos(ta + Math.PI/6);
+      const hy2 = y2 - headLen * Math.sin(ta + Math.PI/6);
+      pathStr = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2} M ${hx1} ${hy1} L ${x2} ${y2} L ${hx2} ${hy2}`;
+    }
+
+    const arrow = new fabric.Path(pathStr, {
+      stroke: color, strokeWidth: 2, fill: '',
+      strokeLineCap: 'round', strokeLineJoin: 'round',
+      selectable: true, evented: true,
+    });
+    arrow.itemId = uuid();
+    arrow._arrowData = { type, x1, y1, x2, y2 };
+    this.canvas.add(arrow);
+    this.canvas.requestRenderAll();
+    return arrow;
+  }
+
+  _createArrowPreview(x1, y1, x2, y2){
+    if(this._arrowPreview) this.canvas.remove(this._arrowPreview);
+    const type = this._arrowType;
+    const headLen = 10;
+    let pathStr;
+
+    if(type === 'straight'){
+      const angle = Math.atan2(y2-y1, x2-x1);
+      const hx1 = x2 - headLen * Math.cos(angle - Math.PI/6);
+      const hy1 = y2 - headLen * Math.sin(angle - Math.PI/6);
+      const hx2 = x2 - headLen * Math.cos(angle + Math.PI/6);
+      const hy2 = y2 - headLen * Math.sin(angle + Math.PI/6);
+      pathStr = `M ${x1} ${y1} L ${x2} ${y2} M ${hx1} ${hy1} L ${x2} ${y2} L ${hx2} ${hy2}`;
+    } else {
+      const mx = (x1+x2)/2, my = (y1+y2)/2;
+      const dx = x2-x1, dy = y2-y1;
+      const dist = Math.sqrt(dx*dx+dy*dy) || 1;
+      const offset = dist * 0.25;
+      const nx = -dy/dist, ny = dx/dist;
+      const cx = mx + nx*offset, cy = my + ny*offset;
+      const tx = x2-cx, ty = y2-cy;
+      const ta = Math.atan2(ty, tx);
+      const hx1 = x2 - headLen * Math.cos(ta - Math.PI/6);
+      const hy1 = y2 - headLen * Math.sin(ta - Math.PI/6);
+      const hx2 = x2 - headLen * Math.cos(ta + Math.PI/6);
+      const hy2 = y2 - headLen * Math.sin(ta + Math.PI/6);
+      pathStr = `M ${x1} ${y1} Q ${cx} ${cy} ${x2} ${y2} M ${hx1} ${hy1} L ${x2} ${y2} L ${hx2} ${hy2}`;
+    }
+
+    this._arrowPreview = new fabric.Path(pathStr, {
+      stroke: this._drawColor, strokeWidth: 2, fill: '',
+      strokeLineCap: 'round', strokeLineJoin: 'round',
+      strokeDashArray: [6, 4],
+      selectable: false, evented: false,
+    });
+    this.canvas.add(this._arrowPreview);
+    this.canvas.requestRenderAll();
   }
 
   initDrawColors(){
