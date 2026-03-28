@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>plaga's board</title>
+<link rel="icon" type="image/png" href="data:image/png;base64,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">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#1c1c1c;--sidebar-bg:#141414;--item-bg:#252525;--item-hover:#333333;
+  --item-sel:#3a3a3a;--accent:#6c63ff;--accent-h:#7f78ff;--accent-p:#5a52e0;
+  --text1:#e0e0e0;--text2:#888888;--text3:#555555;--border:#333333;
+  --grid:#2a2a2a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text1);
+  display:flex;height:100vh;overflow:hidden;user-select:none;}
+
+/* ─── Sidebar ─── */
+#sidebar{width:240px;min-width:240px;background:var(--sidebar-bg);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:10;}
+.sb-header{text-align:center;padding:16px 12px 0;}
+.sb-title{font-size:18px;font-weight:800;color:var(--text1);}
+.sb-sub{font-size:9px;color:var(--text3);margin-top:2px;}
+.sb-sep{height:1px;background:var(--border);margin:12px;}
+.sb-section-hdr{display:flex;align-items:center;padding:0 12px;margin-bottom:8px;}
+.sb-section-hdr span{font-size:11px;font-weight:600;color:var(--text2);flex:1;}
+.sb-add{width:28px;height:28px;border:none;border-radius:14px;background:var(--accent);
+  color:#fff;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sb-add:hover{background:var(--accent-h);}
+#board-list{flex:1;overflow-y:auto;padding:0 12px;min-height:80px;}
+.board-item{background:var(--item-bg);color:var(--text1);border-radius:8px;padding:12px 14px;
+  margin:2px 0;font-size:13px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.board-item:hover{background:var(--item-hover);}
+.board-item.active{background:var(--item-sel);border-left:3px solid var(--accent);}
+.sb-el-hdr{display:flex;align-items:center;gap:8px;padding:12px;
+  background:var(--item-bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.sb-el-hdr span{font-size:10px;font-weight:700;color:var(--text1);}
+#element-list{flex:1;overflow-y:auto;min-height:60px;}
+.el-item{color:var(--text1);padding:10px 16px;border-bottom:1px solid var(--border);cursor:pointer;
+  font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px;}
+.el-item:hover{background:var(--item-hover);}
+.el-item.active{background:var(--item-sel);border-left:3px solid var(--accent);}
+.el-icon{width:16px;height:16px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.sb-footer{font-size:8px;color:var(--text3);text-align:center;padding:8px;line-height:1.4;}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ─── Canvas Area ─── */
+#canvas-area{flex:1;position:relative;overflow:hidden;background:var(--bg);}
+#canvas-area canvas{display:block;}
+#empty-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--text3);pointer-events:none;}
+
+/* ─── Toolbar ─── */
+#toolbar{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;
+  align-items:center;gap:6px;z-index:20;}
+#toolbar-panel{background:rgba(20,20,20,0.94);border:1px solid var(--border);border-radius:12px;
+  padding:8px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;width:52px;}
+.tb-btn{width:40px;height:40px;border:none;border-radius:8px;background:transparent;color:var(--text1);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;}
+.tb-btn:hover{background:var(--item-hover);}
+.tb-btn:active{background:var(--item-sel);}
+.tb-btn svg{width:22px;height:22px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.tb-sep{width:30px;height:1px;background:var(--border);margin:2px 0;}
+#zoom-label{font-size:8px;color:var(--text2);cursor:pointer;height:20px;display:flex;align-items:center;justify-content:center;}
+#zoom-label:hover{color:var(--text1);}
+#fab{width:44px;height:44px;border:none;border-radius:22px;background:var(--accent);color:#fff;
+  font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+#fab:hover{background:var(--accent-h);}
+#fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* ─── Context Menu ─── */
+#ctx-menu{position:fixed;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:8px;
+  padding:4px;z-index:100;display:none;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+.ctx-item{padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px;white-space:nowrap;position:relative;}
+.ctx-item:hover{background:var(--item-hover);}
+.ctx-sep{height:1px;background:var(--border);margin:4px 0;}
+.ctx-item.has-sub::after{content:'\25B6';position:absolute;right:10px;font-size:8px;opacity:.6;}
+.ctx-sub{display:none;position:absolute;left:100%;top:0;background:var(--sidebar-bg);border:1px solid var(--border);
+  border-radius:8px;padding:4px;min-width:120px;box-shadow:0 8px 24px rgba(0,0,0,.5);max-height:300px;overflow-y:auto;}
+.ctx-item.has-sub:hover>.ctx-sub{display:block;}
+.ctx-color-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle;}
+
+/* ─── Modal ─── */
+#modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;
+  justify-content:center;z-index:200;}
+#modal{background:var(--sidebar-bg);border:1px solid var(--border);border-radius:12px;padding:24px;
+  min-width:320px;max-width:90vw;}
+#modal-title{font-size:16px;font-weight:600;margin-bottom:16px;}
+#modal-body{margin-bottom:20px;}
+#modal-body input{width:100%;padding:10px 12px;background:var(--item-bg);border:1px solid var(--border);
+  border-radius:6px;color:var(--text1);font-size:14px;font-family:inherit;outline:none;}
+#modal-body input:focus{border-color:var(--accent);}
+#modal-actions{display:flex;gap:8px;justify-content:flex-end;}
+.modal-btn{padding:8px 20px;border:none;border-radius:6px;font-size:13px;cursor:pointer;
+  font-family:inherit;background:var(--item-bg);color:var(--text1);}
+.modal-btn:hover{background:var(--item-hover);}
+.modal-btn.primary{background:var(--accent);color:#fff;}
+.modal-btn.primary:hover{background:var(--accent-h);}
+</style>
+</head>
+<body>
+
+<!-- ═══ Sidebar ═══ -->
+<div id="sidebar">
+  <div class="sb-header">
+    <div class="sb-title">plaga's board</div>
+    <div class="sb-sub">Boards infinitos para ideas</div>
+  </div>
+  <div class="sb-sep"></div>
+  <div class="sb-section-hdr"><span>Mis Boards</span><button class="sb-add" onclick="app.promptNewBoard()" title="Nuevo Board (Ctrl+N)">+</button></div>
+  <div id="board-list"></div>
+  <div class="sb-el-hdr">
+    <svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="5" x2="13" y2="5"/><line x1="3" y1="8" x2="13" y2="8"/><line x1="3" y1="11" x2="13" y2="11"/></svg>
+    <span>Elementos del Board</span>
+  </div>
+  <div id="element-list"></div>
+  <div class="sb-footer">Click derecho para renombrar/eliminar</div>
+</div>
+
+<!-- ═══ Canvas Area ═══ -->
+<div id="canvas-area">
+  <canvas id="c"></canvas>
+  <div id="empty-label">Selecciona o crea un board para comenzar</div>
+  <div id="toolbar" style="display:none">
+    <div id="toolbar-panel" style="display:none">
+      <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
+      <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><polyline points="3,13 7,9 10,11 13,7 17,13"/><circle cx="13" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn" title="Exportar (E)" onclick="app.promptExport()"><svg viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="13"/><polyline points="6,7 10,4 14,7"/><polyline points="4,16 4,14"/><line x1="4" y1="16" x2="16" y2="16"/><polyline points="16,16 16,14"/></svg></button>
+      <div class="tb-sep"></div>
+      <button class="tb-btn" title="Centrar Todo (F)" onclick="app.fitAll()"><svg viewBox="0 0 20 20"><rect x="4" y="4" width="12" height="12" rx="1"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn" title="Alejar (Ctrl+-)" onclick="app.zoomOut()"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/><line x1="6.5" y1="9" x2="11.5" y2="9"/></svg></button>
+      <div id="zoom-label" onclick="app.zoomReset()" title="Click para resetear zoom">100%</div>
+      <button class="tb-btn" title="Acercar (Ctrl++)" onclick="app.zoomIn()"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/><line x1="6.5" y1="9" x2="11.5" y2="9"/><line x1="9" y1="6.5" x2="9" y2="11.5"/></svg></button>
+    </div>
+    <button id="fab" onclick="app.toggleToolbar()"><svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/><line x1="10" y1="5" x2="10" y2="15"/></svg></button>
+  </div>
+</div>
+
+<!-- ═══ Context Menu ═══ -->
+<div id="ctx-menu"></div>
+
+<!-- ═══ Modal ═══ -->
+<div id="modal-overlay" onclick="if(event.target===this)app.hideModal()">
+  <div id="modal"><div id="modal-title"></div><div id="modal-body"></div><div id="modal-actions"></div></div>
+</div>
+
+<!-- Hidden file input -->
+<input type="file" id="file-input" accept="image/*" multiple style="display:none">
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════
+const uuid = () => crypto.randomUUID ? crypto.randomUUID() :
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16);});
+
+const COLORS_TEXT = [
+  {name:'Blanco',hex:'#e0e0e0'},{name:'Rojo',hex:'#e05555'},{name:'Naranja',hex:'#e09050'},
+  {name:'Amarillo',hex:'#e0d050'},{name:'Verde',hex:'#50c070'},{name:'Azul',hex:'#5080e0'},
+  {name:'Violeta',hex:'#8060e0'},{name:'Rosa',hex:'#e060a0'}
+];
+const FONT_SIZES = [10,12,14,16,20,24,28,32,40,48,64,80];
+
+// ═══════════════════════════════════════════════════════════════
+//  DATABASE (IndexedDB)
+// ═══════════════════════════════════════════════════════════════
+class DB {
+  constructor(){this.db=null;}
+  open(){
+    return new Promise((res,rej)=>{
+      const r=indexedDB.open('plagas_board_db',1);
+      r.onupgradeneeded=e=>{e.target.result.createObjectStore('boards',{keyPath:'id'});};
+      r.onsuccess=e=>{this.db=e.target.result;res();};
+      r.onerror=e=>rej(e);
+    });
+  }
+  getAll(){return this._tx('readonly',s=>s.getAll());}
+  get(id){return this._tx('readonly',s=>s.get(id));}
+  put(d){return this._tx('readwrite',s=>s.put(d));}
+  del(id){return this._tx('readwrite',s=>s.delete(id));}
+  _tx(mode,fn){
+    return new Promise((res,rej)=>{
+      const tx=this.db.transaction('boards',mode);
+      const r=fn(tx.objectStore('boards'));
+      r.onsuccess=()=>res(r.result);
+      r.onerror=()=>rej(r.error);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MAIN APP
+// ═══════════════════════════════════════════════════════════════
+class App {
+  constructor(){
+    this.db = new DB();
+    this.canvas = null;
+    this.boards = {};       // id -> {id, name, items, createdAt}
+    this.currentBoardId = null;
+    this.toolbarExpanded = false;
+    this._panning = false;
+    this._panStart = {x:0,y:0};
+    this._autoSaveTimer = null;
+  }
+
+  async init(){
+    await this.db.open();
+    this.initCanvas();
+    this.setupCanvasEvents();
+    this.setupShortcuts();
+    this.setupDragDrop();
+    this.setupPaste();
+    this.setupResize();
+    await this.loadAllBoards();
+    this.startAutoSave();
+    window.addEventListener('beforeunload', ()=> this.saveCurrentBoard());
+  }
+
+  // ─── Canvas Init ───
+  initCanvas(){
+    const area = document.getElementById('canvas-area');
+    const c = document.getElementById('c');
+    c.width = area.clientWidth;
+    c.height = area.clientHeight;
+
+    this.canvas = new fabric.Canvas('c',{
+      selection: true,
+      uniformScaling: true,
+      preserveObjectStacking: true,
+      stopContextMenu: true,
+      fireRightClick: true,
+      fireMiddleClick: true,
+    });
+
+    // Selection styles
+    fabric.Object.prototype.set({
+      borderColor:'#6c63ff', cornerColor:'#6c63ff', cornerStrokeColor:'#ffffff',
+      cornerStyle:'circle', cornerSize:10, transparentCorners:false,
+      borderScaleFactor:2, padding:4, borderDashArray:[4,4],
+    });
+
+    // Grid drawing
+    this.canvas.on('after:render', ()=> this.drawGrid());
+  }
+
+  drawGrid(){
+    const ctx = this.canvas.contextContainer;
+    const vpt = this.canvas.viewportTransform;
+    const zoom = this.canvas.getZoom();
+    if(zoom < 0.08) return; // skip grid when very zoomed out
+
+    let spacing = 30;
+    if(zoom < 0.25) spacing = 90;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.transform(vpt[0],vpt[1],vpt[2],vpt[3],vpt[4],vpt[5]);
+
+    const inv = fabric.util.invertTransform(vpt);
+    const tl = fabric.util.transformPoint(new fabric.Point(0,0), inv);
+    const br = fabric.util.transformPoint(new fabric.Point(this.canvas.width, this.canvas.height), inv);
+
+    const sx = Math.floor(tl.x/spacing)*spacing;
+    const sy = Math.floor(tl.y/spacing)*spacing;
+
+    ctx.fillStyle = '#2a2a2a';
+    for(let x=sx; x<=br.x; x+=spacing){
+      for(let y=sy; y<=br.y; y+=spacing){
+        ctx.beginPath();
+        ctx.arc(x,y,1.5,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+    // Background behind grid
+    ctx.fillStyle = '#1c1c1c';
+    ctx.fillRect(tl.x-200, tl.y-200, br.x-tl.x+400, br.y-tl.y+400);
+    ctx.restore();
+  }
+
+  // ─── Canvas Events ───
+  setupCanvasEvents(){
+    const c = this.canvas;
+
+    // Pan (middle button or left on empty)
+    c.on('mouse:down', opt=>{
+      const e = opt.e;
+      // Right click → context menu
+      if(e.button===2){
+        e.preventDefault();
+        const target = c.findTarget(e);
+        if(target) c.setActiveObject(target);
+        this.showContextMenu(e.clientX, e.clientY, target);
+        return;
+      }
+      // Middle button or left on empty → pan
+      if(e.button===1 || (e.button===0 && !opt.target)){
+        this._panning = true;
+        this._panStart = {x:e.clientX, y:e.clientY};
+        c.selection = false;
+        c.defaultCursor = 'grabbing';
+        c.setCursor('grabbing');
+      }
+    });
+
+    c.on('mouse:move', opt=>{
+      if(this._panning){
+        const e = opt.e;
+        const vpt = c.viewportTransform;
+        vpt[4] += e.clientX - this._panStart.x;
+        vpt[5] += e.clientY - this._panStart.y;
+        this._panStart = {x:e.clientX, y:e.clientY};
+        c.requestRenderAll();
+      }
+    });
+
+    c.on('mouse:up', ()=>{
+      if(this._panning){
+        this._panning = false;
+        c.selection = true;
+        c.defaultCursor = 'default';
+        c.setCursor('default');
+      }
+    });
+
+    // Zoom (scroll wheel)
+    c.on('mouse:wheel', opt=>{
+      const e = opt.e;
+      e.preventDefault();
+      e.stopPropagation();
+
+      // If scrolling on selected text → resize font
+      const target = c.getActiveObject();
+      if(target && target.type === 'i-text' && target === c.findTarget(e)){
+        let fs = target.fontSize;
+        fs += (e.deltaY < 0 ? 2 : -2);
+        fs = Math.max(8, Math.min(120, fs));
+        target.set('fontSize', fs);
+        c.requestRenderAll();
+        this.updateElementList();
+        return;
+      }
+
+      // Zoom canvas
+      const factor = 1.15;
+      let zoom = c.getZoom();
+      zoom = e.deltaY < 0 ? zoom * factor : zoom / factor;
+      zoom = Math.max(0.02, Math.min(5, zoom));
+      c.zoomToPoint({x:e.offsetX, y:e.offsetY}, zoom);
+      this.updateZoomLabel();
+    });
+
+    // Text scale → font size conversion
+    c.on('object:modified', opt=>{
+      const obj = opt.target;
+      if(obj && obj.type === 'i-text' && (obj.scaleX!==1 || obj.scaleY!==1)){
+        const newSize = Math.round(obj.fontSize * Math.max(obj.scaleX, obj.scaleY));
+        obj.set({fontSize: Math.max(8,Math.min(120,newSize)), scaleX:1, scaleY:1});
+        c.requestRenderAll();
+      }
+      this.updateElementList();
+    });
+
+    // Text exit editing → remove if empty
+    c.on('text:editing:exited', opt=>{
+      const obj = opt.target;
+      if(obj && !obj.text.trim()){
+        c.remove(obj);
+      }
+      this.updateElementList();
+    });
+
+    c.on('object:added', ()=> this.updateElementList());
+    c.on('object:removed', ()=> this.updateElementList());
+
+    c.on('selection:created', opt=> this.highlightElement(opt.selected?.[0]));
+    c.on('selection:updated', opt=> this.highlightElement(opt.selected?.[0]));
+    c.on('selection:cleared', ()=> this.highlightElement(null));
+  }
+
+  // ─── Keyboard Shortcuts ───
+  setupShortcuts(){
+    document.addEventListener('keydown', e=>{
+      // Check if typing in a modal input
+      if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const editing = this.isTextEditing();
+      const ctrl = e.ctrlKey || e.metaKey;
+
+      if(!editing){
+        if(e.key==='t'||e.key==='T'){e.preventDefault(); this.addText(); return;}
+        if(e.key==='i'||e.key==='I'){e.preventDefault(); this.addImage(); return;}
+        if(e.key==='e'||e.key==='E'){e.preventDefault(); this.promptExport(); return;}
+        if(e.key==='f'||e.key==='F'){e.preventDefault(); this.fitAll(); return;}
+        if(e.key==='Delete'||e.key==='Backspace'){this.deleteSelected(); return;}
+      }
+      if(ctrl && e.key==='='){e.preventDefault(); this.zoomIn(); return;}
+      if(ctrl && e.key==='-'){e.preventDefault(); this.zoomOut(); return;}
+      if(ctrl && e.key==='0'){e.preventDefault(); this.zoomReset(); return;}
+      if(ctrl && (e.key==='s'||e.key==='S')){e.preventDefault(); this.saveCurrentBoard(); return;}
+      if(ctrl && (e.key==='n'||e.key==='N')){e.preventDefault(); this.promptNewBoard(); return;}
+    });
+  }
+
+  isTextEditing(){
+    const a = this.canvas.getActiveObject();
+    return a && a.type === 'i-text' && a.isEditing;
+  }
+
+  // ─── Drag & Drop ───
+  setupDragDrop(){
+    const area = document.getElementById('canvas-area');
+    area.addEventListener('dragover', e=>{e.preventDefault(); e.dataTransfer.dropEffect='copy';});
+    area.addEventListener('drop', e=>{
+      e.preventDefault();
+      if(!this.currentBoardId) return;
+      const files = e.dataTransfer.files;
+      let offset = 0;
+      for(const f of files){
+        if(f.type.startsWith('image/')){
+          const reader = new FileReader();
+          reader.onload = ev=>{
+            const pt = this.canvas.getPointer(e);
+            this.addImageFromDataUrl(ev.target.result, pt.x + offset, pt.y + offset);
+            offset += 30;
+          };
+          reader.readAsDataURL(f);
+        }
+      }
+    });
+  }
+
+  // ─── Clipboard Paste ───
+  setupPaste(){
+    document.addEventListener('paste', e=>{
+      if(!this.currentBoardId) return;
+      if(e.target.tagName==='INPUT') return;
+      if(this.isTextEditing()) return;
+
+      const items = e.clipboardData?.items;
+      if(!items) return;
+
+      // Check for images first
+      for(const item of items){
+        if(item.type.startsWith('image/')){
+          const blob = item.getAsFile();
+          const reader = new FileReader();
+          reader.onload = ev => this.addImageFromDataUrl(ev.target.result);
+          reader.readAsDataURL(blob);
+          e.preventDefault();
+          return;
+        }
+      }
+      // Text paste
+      const text = e.clipboardData?.getData('text');
+      if(text && text.trim()){
+        this.addTextAtCenter(text);
+        e.preventDefault();
+      }
+    });
+  }
+
+  // ─── Window Resize ───
+  setupResize(){
+    const resize = ()=>{
+      const area = document.getElementById('canvas-area');
+      this.canvas.setWidth(area.clientWidth);
+      this.canvas.setHeight(area.clientHeight);
+      this.canvas.requestRenderAll();
+    };
+    window.addEventListener('resize', resize);
+    // Initial delay for layout
+    setTimeout(resize, 100);
+  }
+
+  // ─── Board Management ───
+  async loadAllBoards(){
+    const all = await this.db.getAll();
+    all.sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+    all.forEach(b=>{this.boards[b.id]=b;});
+    this.updateBoardList();
+    if(all.length > 0){
+      this.selectBoard(all[0].id);
+    }
+  }
+
+  promptNewBoard(){
+    this.showModal('Nuevo Board',
+      '<input id="modal-input" placeholder="Nombre del board" value="Board '+(Object.keys(this.boards).length+1)+'">',
+      [{label:'Cancelar'},{label:'Crear', primary:true, action:()=>{
+        const name = document.getElementById('modal-input').value.trim();
+        if(name) this.createBoard(name);
+      }}]
+    );
+    setTimeout(()=>{const inp=document.getElementById('modal-input');if(inp){inp.focus();inp.select();}},50);
+  }
+
+  async createBoard(name){
+    const id = uuid();
+    const board = {id, name, items:[], createdAt:Date.now()};
+    this.boards[id] = board;
+    await this.db.put(board);
+    this.updateBoardList();
+    this.selectBoard(id);
+  }
+
+  async selectBoard(id){
+    if(this.currentBoardId) await this.saveCurrentBoard();
+    this.currentBoardId = id;
+    this.updateBoardList();
+    await this.loadBoardToCanvas(id);
+    document.getElementById('empty-label').style.display = 'none';
+    document.getElementById('toolbar').style.display = '';
+  }
+
+  async deleteBoard(id){
+    if(!confirm(`Eliminar "${this.boards[id]?.name}"?`)) return;
+    delete this.boards[id];
+    await this.db.del(id);
+    if(this.currentBoardId === id){
+      this.currentBoardId = null;
+      this.canvas.clear();
+      this.canvas.requestRenderAll();
+      document.getElementById('empty-label').style.display = '';
+      document.getElementById('toolbar').style.display = 'none';
+    }
+    this.updateBoardList();
+    this.updateElementList();
+  }
+
+  promptRename(id){
+    const board = this.boards[id];
+    if(!board) return;
+    this.showModal('Renombrar Board',
+      '<input id="modal-input" value="'+board.name.replace(/"/g,'&quot;')+'">',
+      [{label:'Cancelar'},{label:'Renombrar', primary:true, action:async()=>{
+        const name = document.getElementById('modal-input').value.trim();
+        if(name){board.name=name; await this.db.put(board); this.updateBoardList();}
+      }}]
+    );
+    setTimeout(()=>{const inp=document.getElementById('modal-input');if(inp){inp.focus();inp.select();}},50);
+  }
+
+  async saveCurrentBoard(){
+    if(!this.currentBoardId || !this.boards[this.currentBoardId]) return;
+    this.boards[this.currentBoardId].items = this.serializeItems();
+    await this.db.put(this.boards[this.currentBoardId]);
+  }
+
+  async loadBoardToCanvas(id){
+    this.canvas.clear();
+    const board = this.boards[id];
+    if(!board || !board.items) { this.canvas.requestRenderAll(); return; }
+
+    // Sort by z-index
+    const sorted = [...board.items].sort((a,b)=>(a.z||0)-(b.z||0));
+
+    for(const item of sorted){
+      try{
+        if(item.type === 'image'){
+          await this.loadImageItem(item);
+        } else if(item.type === 'text'){
+          this.loadTextItem(item);
+        }
+      }catch(e){console.error('Error loading item:',e);}
+    }
+    // Reset view
+    this.canvas.setViewportTransform([1,0,0,1,0,0]);
+    this.updateZoomLabel();
+    this.canvas.requestRenderAll();
+    this.updateElementList();
+  }
+
+  loadImageItem(item){
+    return new Promise(resolve=>{
+      const src = item.image_data.startsWith('data:') ? item.image_data : 'data:image/png;base64,'+item.image_data;
+      fabric.Image.fromURL(src, img=>{
+        if(!img){resolve();return;}
+        const sw = (item.width||img.width) / img.width;
+        const sh = (item.height||img.height) / img.height;
+        img.set({left:item.x||0, top:item.y||0, scaleX:sw, scaleY:sh, lockUniScaling:true});
+        img.itemId = item.id || uuid();
+        img._originalDataUrl = src;
+        img._origW = img.width;
+        img._origH = img.height;
+        this.canvas.add(img);
+        resolve();
+      },{crossOrigin:'anonymous'});
+    });
+  }
+
+  loadTextItem(item){
+    const t = new fabric.IText(item.text||'Texto',{
+      left:item.x||0, top:item.y||0,
+      fontSize: item.font_size||16,
+      fill: item.color||'#e0e0e0',
+      fontFamily:'Inter',
+      textBackgroundColor: (item.bg_color && item.bg_color!=='transparent') ? item.bg_color : '',
+    });
+    t.itemId = item.id || uuid();
+    this.canvas.add(t);
+  }
+
+  // ─── Serialization ───
+  serializeItems(){
+    const items = [];
+    this.canvas.getObjects().forEach((obj,idx)=>{
+      if(obj.type === 'image'){
+        items.push({
+          type:'image', id: obj.itemId||uuid(),
+          x:obj.left, y:obj.top, z:idx,
+          width: Math.round(obj.width*obj.scaleX),
+          height: Math.round(obj.height*obj.scaleY),
+          image_data: obj._originalDataUrl || ''
+        });
+      } else if(obj.type === 'i-text'){
+        items.push({
+          type:'text', id: obj.itemId||uuid(),
+          x:obj.left, y:obj.top, z:idx,
+          text: obj.text,
+          font_size: obj.fontSize,
+          color: obj.fill,
+          bg_color: obj.textBackgroundColor || 'transparent'
+        });
+      }
+    });
+    return items;
+  }
+
+  // ─── Add Items ───
+  addText(initialText){
+    if(!this.currentBoardId) return;
+    const center = this.getViewportCenter();
+    const t = new fabric.IText(initialText || 'Texto',{
+      left:center.x-40, top:center.y-15,
+      fontSize:16, fill:'#e0e0e0', fontFamily:'Inter',
+    });
+    t.itemId = uuid();
+    this.canvas.add(t);
+    this.canvas.setActiveObject(t);
+    t.enterEditing();
+    t.selectAll();
+    this.canvas.requestRenderAll();
+  }
+
+  addTextAtCenter(text){
+    if(!this.currentBoardId) return;
+    const center = this.getViewportCenter();
+    const t = new fabric.IText(text,{
+      left:center.x-40, top:center.y-15,
+      fontSize:16, fill:'#e0e0e0', fontFamily:'Inter',
+    });
+    t.itemId = uuid();
+    this.canvas.add(t);
+    this.canvas.setActiveObject(t);
+    this.canvas.requestRenderAll();
+  }
+
+  addImage(){
+    if(!this.currentBoardId) return;
+    const input = document.getElementById('file-input');
+    input.value = '';
+    input.onchange = ()=>{
+      let offset = 0;
+      for(const f of input.files){
+        const reader = new FileReader();
+        reader.onload = ev=>{
+          this.addImageFromDataUrl(ev.target.result, undefined, undefined, offset);
+          offset += 30;
+        };
+        reader.readAsDataURL(f);
+      }
+    };
+    input.click();
+  }
+
+  addImageFromDataUrl(dataUrl, x, y, offset=0){
+    fabric.Image.fromURL(dataUrl, img=>{
+      if(!img) return;
+      // Scale down large images
+      const maxDim = 800;
+      let scale = 1;
+      if(img.width > maxDim || img.height > maxDim){
+        scale = maxDim / Math.max(img.width, img.height);
+      }
+      const center = this.getViewportCenter();
+      img.set({
+        left: (x != null ? x : center.x - (img.width*scale)/2) + offset,
+        top: (y != null ? y : center.y - (img.height*scale)/2) + offset,
+        scaleX: scale, scaleY: scale,
+        lockUniScaling: true,
+      });
+      img.itemId = uuid();
+      img._originalDataUrl = dataUrl;
+      img._origW = img.width;
+      img._origH = img.height;
+      this.canvas.add(img);
+      this.canvas.setActiveObject(img);
+      this.canvas.requestRenderAll();
+    },{crossOrigin:'anonymous'});
+  }
+
+  deleteSelected(){
+    const active = this.canvas.getActiveObjects();
+    if(active.length === 0) return;
+    active.forEach(o=> this.canvas.remove(o));
+    this.canvas.discardActiveObject();
+    this.canvas.requestRenderAll();
+  }
+
+  // ─── Zoom ───
+  zoomIn(){
+    let zoom = this.canvas.getZoom() * 1.25;
+    zoom = Math.min(5, zoom);
+    const center = {x:this.canvas.width/2, y:this.canvas.height/2};
+    this.canvas.zoomToPoint(center, zoom);
+    this.updateZoomLabel();
+  }
+
+  zoomOut(){
+    let zoom = this.canvas.getZoom() * 0.8;
+    zoom = Math.max(0.02, zoom);
+    const center = {x:this.canvas.width/2, y:this.canvas.height/2};
+    this.canvas.zoomToPoint(center, zoom);
+    this.updateZoomLabel();
+  }
+
+  zoomReset(){
+    this.canvas.setViewportTransform([1,0,0,1,0,0]);
+    this.updateZoomLabel();
+  }
+
+  fitAll(){
+    const objs = this.canvas.getObjects();
+    if(objs.length === 0){this.zoomReset(); return;}
+
+    // Reset transform to get true object coordinates
+    const savedVpt = [...this.canvas.viewportTransform];
+    this.canvas.setViewportTransform([1,0,0,1,0,0]);
+
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    objs.forEach(o=>{
+      const r = o.getBoundingRect();
+      minX=Math.min(minX,r.left); minY=Math.min(minY,r.top);
+      maxX=Math.max(maxX,r.left+r.width); maxY=Math.max(maxY,r.top+r.height);
+    });
+
+    const margin = 50;
+    const cw = maxX-minX+2*margin, ch = maxY-minY+2*margin;
+    const cx = (minX+maxX)/2, cy = (minY+maxY)/2;
+    const zoom = Math.min(this.canvas.width/cw, this.canvas.height/ch, 5);
+
+    this.canvas.setViewportTransform([
+      zoom, 0, 0, zoom,
+      this.canvas.width/2 - cx*zoom,
+      this.canvas.height/2 - cy*zoom
+    ]);
+    this.updateZoomLabel();
+    this.canvas.requestRenderAll();
+  }
+
+  updateZoomLabel(){
+    document.getElementById('zoom-label').textContent = Math.round(this.canvas.getZoom()*100)+'%';
+  }
+
+  getViewportCenter(){
+    const vpt = this.canvas.viewportTransform;
+    const inv = fabric.util.invertTransform(vpt);
+    return fabric.util.transformPoint(
+      new fabric.Point(this.canvas.width/2, this.canvas.height/2), inv
+    );
+  }
+
+  // ─── Export ───
+  promptExport(){
+    if(!this.currentBoardId) return;
+    if(this.canvas.getObjects().length===0){alert('El board esta vacio.'); return;}
+    this.showModal('Exportar Board','Selecciona el formato de exportacion:',[
+      {label:'PNG', primary:true, action:()=>this.exportAs('png')},
+      {label:'JPEG', action:()=>this.exportAs('jpeg')},
+      {label:'PDF', action:()=>this.exportAs('pdf')},
+    ]);
+  }
+
+  exportAs(format){
+    this.canvas.discardActiveObject();
+    this.canvas.requestRenderAll();
+
+    // Get bounds
+    const objs = this.canvas.getObjects();
+    const savedVpt = [...this.canvas.viewportTransform];
+    this.canvas.setViewportTransform([1,0,0,1,0,0]);
+
+    let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+    objs.forEach(o=>{
+      const r=o.getBoundingRect();
+      minX=Math.min(minX,r.left);minY=Math.min(minY,r.top);
+      maxX=Math.max(maxX,r.left+r.width);maxY=Math.max(maxY,r.top+r.height);
+    });
+    const margin=50;
+    const left=minX-margin, top_=minY-margin;
+    const width=maxX-minX+2*margin, height=maxY-minY+2*margin;
+
+    // Render to export canvas (without grid, with bg)
+    const maxDim = 8000;
+    let multiplier = 1;
+    if(width > maxDim || height > maxDim) multiplier = maxDim / Math.max(width, height);
+
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = Math.round(width * multiplier);
+    exportCanvas.height = Math.round(height * multiplier);
+    const ctx = exportCanvas.getContext('2d');
+
+    // Fill background
+    ctx.fillStyle = '#1c1c1c';
+    ctx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
+
+    // Draw each object
+    ctx.save();
+    ctx.scale(multiplier, multiplier);
+    ctx.translate(-left, -top_);
+    objs.forEach(o=>{
+      ctx.save();
+      const m = o.calcTransformMatrix();
+      ctx.transform(m[0],m[1],m[2],m[3],m[4],m[5]);
+      o.drawObject(ctx);
+      ctx.restore();
+    });
+    ctx.restore();
+
+    // Restore viewport
+    this.canvas.setViewportTransform(savedVpt);
+    this.canvas.requestRenderAll();
+
+    const fileName = 'board_'+(this.currentBoardId||'').substr(0,6);
+
+    if(format === 'pdf'){
+      const {jsPDF} = window.jspdf;
+      const pxToMm = 25.4/96;
+      const wMm = width*pxToMm, hMm = height*pxToMm;
+      const pdf = new jsPDF({orientation:width>height?'l':'p', unit:'mm', format:[wMm,hMm]});
+      const imgData = exportCanvas.toDataURL('image/png');
+      pdf.addImage(imgData,'PNG',0,0,wMm,hMm);
+      pdf.save(fileName+'.pdf');
+    } else {
+      const link = document.createElement('a');
+      link.download = fileName+'.'+format;
+      link.href = exportCanvas.toDataURL('image/'+format, format==='jpeg'?0.95:undefined);
+      link.click();
+    }
+  }
+
+  // ─── Sidebar Updates ───
+  updateBoardList(){
+    const list = document.getElementById('board-list');
+    list.innerHTML = '';
+    Object.values(this.boards)
+      .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))
+      .forEach(b=>{
+        const div = document.createElement('div');
+        div.className = 'board-item' + (b.id===this.currentBoardId?' active':'');
+        div.textContent = b.name;
+        div.onclick = ()=> this.selectBoard(b.id);
+        div.oncontextmenu = e=>{
+          e.preventDefault();
+          this.showBoardContextMenu(e.clientX, e.clientY, b.id);
+        };
+        list.appendChild(div);
+      });
+  }
+
+  updateElementList(){
+    const list = document.getElementById('element-list');
+    list.innerHTML = '';
+    const objs = this.canvas.getObjects().slice().sort((a,b)=>(a.top||0)-(b.top||0));
+    objs.forEach((obj,i)=>{
+      const div = document.createElement('div');
+      div.className = 'el-item';
+      const active = this.canvas.getActiveObject();
+      if(active === obj) div.classList.add('active');
+
+      let icon, label;
+      if(obj.type === 'image'){
+        icon = '<svg class="el-icon" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1"/><polyline points="2,11 5,8 8,10 11,6 14,11"/></svg>';
+        label = 'Imagen '+(i+1);
+      } else if(obj.type === 'i-text'){
+        icon = '<svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="5" x2="13" y2="5"/><line x1="8" y1="5" x2="8" y2="13"/></svg>';
+        const txt = obj.text.replace(/\n/g,' ');
+        label = txt.length > 15 ? txt.substr(0,15)+'...' : txt;
+      } else return;
+
+      div.innerHTML = icon + '<span>'+label+'</span>';
+      div.onclick = ()=>{
+        this.canvas.setActiveObject(obj);
+        // Center on object
+        const center = obj.getCenterPoint();
+        const zoom = this.canvas.getZoom();
+        const vpt = this.canvas.viewportTransform;
+        vpt[4] = this.canvas.width/2 - center.x*zoom;
+        vpt[5] = this.canvas.height/2 - center.y*zoom;
+        this.canvas.requestRenderAll();
+      };
+      list.appendChild(div);
+    });
+  }
+
+  highlightElement(obj){
+    document.querySelectorAll('.el-item').forEach((el,i)=>{
+      const objs = this.canvas.getObjects().slice().sort((a,b)=>(a.top||0)-(b.top||0));
+      el.classList.toggle('active', objs[i]===obj);
+    });
+  }
+
+  // ─── Context Menu ───
+  showContextMenu(x, y, target){
+    const menu = document.getElementById('ctx-menu');
+    menu.innerHTML = '';
+
+    if(target && target.type === 'image'){
+      this.addCtxItem(menu,'🗑  Eliminar imagen',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'⬆  Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'⬇  Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();});
+      menu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-sep'}));
+      this.addCtxItem(menu,'↺  Tamano original',()=>{target.set({scaleX:1,scaleY:1});this.canvas.requestRenderAll();});
+    } else if(target && target.type === 'i-text'){
+      this.addCtxItem(menu,'✏  Editar texto',()=>{this.canvas.setActiveObject(target);target.enterEditing();});
+      this.addCtxItem(menu,'🗑  Eliminar texto',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'⬆  Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'⬇  Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();});
+      menu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-sep'}));
+
+      // Font size submenu
+      const sizeItem = this.addCtxItem(menu,'🔤  Tamano de fuente',null,true);
+      const sizeSub = document.createElement('div');
+      sizeSub.className = 'ctx-sub';
+      FONT_SIZES.forEach(s=>{
+        this.addCtxItem(sizeSub, s+'px', ()=>{target.set('fontSize',s);this.canvas.requestRenderAll();});
+      });
+      sizeItem.appendChild(sizeSub);
+
+      // Color submenu
+      const colorItem = this.addCtxItem(menu,'🎨  Color de texto',null,true);
+      const colorSub = document.createElement('div');
+      colorSub.className = 'ctx-sub';
+      COLORS_TEXT.forEach(c=>{
+        const ci = this.addCtxItem(colorSub, '', ()=>{target.set('fill',c.hex);this.canvas.requestRenderAll();});
+        ci.innerHTML = '<span class="ctx-color-dot" style="background:'+c.hex+'"></span>'+c.name;
+      });
+      colorItem.appendChild(colorSub);
+    } else {
+      return; // No menu for empty canvas
+    }
+
+    // Position and show
+    menu.style.left = Math.min(x, window.innerWidth-200)+'px';
+    menu.style.top = Math.min(y, window.innerHeight-300)+'px';
+    menu.style.display = 'block';
+
+    const closeMenu = e=>{
+      if(!menu.contains(e.target)){
+        menu.style.display='none';
+        document.removeEventListener('mousedown',closeMenu);
+      }
+    };
+    setTimeout(()=>document.addEventListener('mousedown',closeMenu),0);
+  }
+
+  showBoardContextMenu(x,y,boardId){
+    const menu = document.getElementById('ctx-menu');
+    menu.innerHTML='';
+    this.addCtxItem(menu,'✏  Renombrar',()=>this.promptRename(boardId));
+    this.addCtxItem(menu,'🗑  Eliminar',()=>this.deleteBoard(boardId));
+    menu.style.left=x+'px'; menu.style.top=y+'px'; menu.style.display='block';
+    const close=e=>{if(!menu.contains(e.target)){menu.style.display='none';document.removeEventListener('mousedown',close);}};
+    setTimeout(()=>document.addEventListener('mousedown',close),0);
+  }
+
+  addCtxItem(parent, label, action, hasSub=false){
+    const div = document.createElement('div');
+    div.className = 'ctx-item' + (hasSub?' has-sub':'');
+    div.textContent = label;
+    if(action){
+      div.onclick = e=>{
+        e.stopPropagation();
+        document.getElementById('ctx-menu').style.display='none';
+        action();
+      };
+    }
+    parent.appendChild(div);
+    return div;
+  }
+
+  // ─── Toolbar ───
+  toggleToolbar(){
+    this.toolbarExpanded = !this.toolbarExpanded;
+    document.getElementById('toolbar-panel').style.display = this.toolbarExpanded?'':'none';
+    const fab = document.getElementById('fab');
+    fab.innerHTML = this.toolbarExpanded
+      ? '<svg viewBox="0 0 20 20"><line x1="5.5" y1="5.5" x2="14.5" y2="14.5"/><line x1="14.5" y1="5.5" x2="5.5" y2="14.5"/></svg>'
+      : '<svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/><line x1="10" y1="5" x2="10" y2="15"/></svg>';
+  }
+
+  // ─── Modal ───
+  showModal(title, bodyHtml, actions){
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-body').innerHTML = bodyHtml;
+    const actDiv = document.getElementById('modal-actions');
+    actDiv.innerHTML='';
+    actions.forEach(a=>{
+      const btn = document.createElement('button');
+      btn.textContent = a.label;
+      btn.className = 'modal-btn' + (a.primary?' primary':'');
+      btn.onclick = ()=>{this.hideModal(); if(a.action) a.action();};
+      actDiv.appendChild(btn);
+    });
+    document.getElementById('modal-overlay').style.display='flex';
+    // Enter key submits
+    const inp = document.getElementById('modal-input');
+    if(inp){
+      inp.onkeydown = e=>{
+        if(e.key==='Enter'){
+          const primary = actDiv.querySelector('.primary');
+          if(primary) primary.click();
+        }
+        if(e.key==='Escape') this.hideModal();
+      };
+    }
+  }
+
+  hideModal(){
+    document.getElementById('modal-overlay').style.display='none';
+  }
+
+  // ─── Auto-save ───
+  startAutoSave(){
+    this._autoSaveTimer = setInterval(()=> this.saveCurrentBoard(), 10000);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+const app = new App();
+app.init().catch(e=>console.error('Init error:',e));
+</script>
+</body>
+</html>
