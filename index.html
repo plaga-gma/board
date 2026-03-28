@@ -77,6 +77,21 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 #fab:hover{background:var(--accent-h);}
 #fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;}
 
+/* ─── Draw Panel ─── */
+#draw-panel{position:absolute;bottom:16px;right:76px;background:rgba(20,20,20,0.94);border:1px solid var(--border);
+  border-radius:12px;padding:12px;z-index:20;display:none;width:180px;}
+#draw-panel label{font-size:11px;color:var(--text2);display:block;margin-bottom:6px;}
+#draw-panel .dp-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+#draw-panel .dp-row:last-child{margin-bottom:0;}
+#draw-size-slider{flex:1;accent-color:var(--accent);height:4px;}
+#draw-size-val{font-size:11px;color:var(--text1);min-width:28px;text-align:right;}
+.dp-colors{display:flex;flex-wrap:wrap;gap:6px;}
+.dp-color{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s;}
+.dp-color:hover{border-color:var(--text2);}
+.dp-color.active{border-color:var(--accent);}
+.tb-btn.draw-active{background:var(--accent) !important;color:#fff;}
+.tb-btn.draw-active svg{stroke:#fff;}
+
 /* ─── Context Menu ─── */
 #ctx-menu{position:fixed;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:8px;
   padding:4px;z-index:100;display:none;min-width:180px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
@@ -135,6 +150,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
       <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><polyline points="3,13 7,9 10,11 13,7 17,13"/><circle cx="13" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" title="Exportar (E)" onclick="app.promptExport()"><svg viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="13"/><polyline points="6,7 10,4 14,7"/><polyline points="4,16 4,14"/><line x1="4" y1="16" x2="16" y2="16"/><polyline points="16,16 16,14"/></svg></button>
+      <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.toggleDrawing()"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
       <div class="tb-sep"></div>
       <button class="tb-btn" title="Centrar Todo (F)" onclick="app.fitAll()"><svg viewBox="0 0 20 20"><rect x="4" y="4" width="12" height="12" rx="1"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" title="Alejar (Ctrl+-)" onclick="app.zoomOut()"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/><line x1="6.5" y1="9" x2="11.5" y2="9"/></svg></button>
@@ -143,6 +159,17 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     </div>
     <button id="fab" onclick="app.toggleToolbar()"><svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/><line x1="10" y1="5" x2="10" y2="15"/></svg></button>
   </div>
+</div>
+
+<!-- ═══ Draw Panel ═══ -->
+<div id="draw-panel">
+  <label>Tamaño del trazo</label>
+  <div class="dp-row">
+    <input type="range" id="draw-size-slider" min="1" max="30" value="3" oninput="app.setDrawSize(+this.value)">
+    <span id="draw-size-val">3px</span>
+  </div>
+  <label>Color del trazo</label>
+  <div class="dp-colors" id="draw-colors"></div>
 </div>
 
 <!-- ═══ Context Menu ═══ -->
@@ -210,6 +237,9 @@ class App {
     this._panning = false;
     this._panStart = {x:0,y:0};
     this._autoSaveTimer = null;
+    this._drawingMode = false;
+    this._drawColor = '#e0e0e0';
+    this._drawSize = 3;
   }
 
   async init(){
@@ -301,8 +331,8 @@ class App {
         this.showContextMenu(e.clientX, e.clientY, target);
         return;
       }
-      // Middle button or left on empty → pan
-      if(e.button===1 || (e.button===0 && !opt.target)){
+      // Middle button or left on empty → pan (skip if drawing)
+      if(e.button===1 || (e.button===0 && !opt.target && !this._drawingMode)){
         this._panning = true;
         this._panStart = {x:e.clientX, y:e.clientY};
         c.selection = false;
@@ -378,6 +408,12 @@ class App {
       this.updateElementList();
     });
 
+    c.on('path:created', opt=>{
+      if(opt.path){
+        opt.path.itemId = uuid();
+      }
+    });
+
     c.on('object:added', ()=> this.updateElementList());
     c.on('object:removed', ()=> this.updateElementList());
 
@@ -398,8 +434,10 @@ class App {
         if(e.key==='t'||e.key==='T'){e.preventDefault(); this.addText(); return;}
         if(e.key==='i'||e.key==='I'){e.preventDefault(); this.addImage(); return;}
         if(e.key==='e'||e.key==='E'){e.preventDefault(); this.promptExport(); return;}
+        if(e.key==='d'||e.key==='D'){e.preventDefault(); this.toggleDrawing(); return;}
         if(e.key==='f'||e.key==='F'){e.preventDefault(); this.fitAll(); return;}
         if(e.key==='Delete'||e.key==='Backspace'){this.deleteSelected(); return;}
+        if(e.key==='Escape' && this._drawingMode){e.preventDefault(); this.toggleDrawing(); return;}
       }
       if(ctrl && e.key==='='){e.preventDefault(); this.zoomIn(); return;}
       if(ctrl && e.key==='-'){e.preventDefault(); this.zoomOut(); return;}
@@ -568,6 +606,8 @@ class App {
           await this.loadImageItem(item);
         } else if(item.type === 'text'){
           this.loadTextItem(item);
+        } else if(item.type === 'path'){
+          this.loadPathItem(item);
         }
       }catch(e){console.error('Error loading item:',e);}
     }
@@ -608,6 +648,19 @@ class App {
     this.canvas.add(t);
   }
 
+  loadPathItem(item){
+    const p = new fabric.Path(item.path, {
+      left: item.x||0, top: item.y||0,
+      stroke: item.stroke||'#e0e0e0',
+      strokeWidth: item.strokeWidth||3,
+      fill: item.fill||'',
+      strokeLineCap: 'round', strokeLineJoin: 'round',
+      scaleX: item.scaleX||1, scaleY: item.scaleY||1,
+    });
+    p.itemId = item.id || uuid();
+    this.canvas.add(p);
+  }
+
   // ─── Serialization ───
   serializeItems(){
     const items = [];
@@ -628,6 +681,16 @@ class App {
           font_size: obj.fontSize,
           color: obj.fill,
           bg_color: obj.textBackgroundColor || 'transparent'
+        });
+      } else if(obj.type === 'path'){
+        items.push({
+          type:'path', id: obj.itemId||uuid(),
+          x:obj.left, y:obj.top, z:idx,
+          path: obj.path,
+          stroke: obj.stroke,
+          strokeWidth: obj.strokeWidth,
+          scaleX: obj.scaleX, scaleY: obj.scaleY,
+          fill: obj.fill || ''
         });
       }
     });
@@ -894,6 +957,9 @@ class App {
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="5" x2="13" y2="5"/><line x1="8" y1="5" x2="8" y2="13"/></svg>';
         const txt = obj.text.replace(/\n/g,' ');
         label = txt.length > 15 ? txt.substr(0,15)+'...' : txt;
+      } else if(obj.type === 'path'){
+        icon = '<svg class="el-icon" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z" fill="none"/></svg>';
+        label = 'Dibujo '+(i+1);
       } else return;
 
       div.innerHTML = icon + '<span>'+label+'</span>';
@@ -954,6 +1020,21 @@ class App {
         ci.innerHTML = '<span class="ctx-color-dot" style="background:'+c.hex+'"></span>'+c.name;
       });
       colorItem.appendChild(colorSub);
+    } else if(target && target.type === 'path'){
+      this.addCtxItem(menu,'🗑  Eliminar dibujo',()=>{this.canvas.remove(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'⬆  Traer al frente',()=>{this.canvas.bringToFront(target);this.canvas.requestRenderAll();});
+      this.addCtxItem(menu,'⬇  Enviar atras',()=>{this.canvas.sendToBack(target);this.canvas.requestRenderAll();});
+      menu.appendChild(Object.assign(document.createElement('div'),{className:'ctx-sep'}));
+
+      // Stroke color submenu
+      const colorItem = this.addCtxItem(menu,'🎨  Color del trazo',null,true);
+      const colorSub = document.createElement('div');
+      colorSub.className = 'ctx-sub';
+      COLORS_TEXT.forEach(c=>{
+        const ci = this.addCtxItem(colorSub, '', ()=>{target.set('stroke',c.hex);this.canvas.requestRenderAll();});
+        ci.innerHTML = '<span class="ctx-color-dot" style="background:'+c.hex+'"></span>'+c.name;
+      });
+      colorItem.appendChild(colorSub);
     } else {
       return; // No menu for empty canvas
     }
@@ -995,6 +1076,72 @@ class App {
     }
     parent.appendChild(div);
     return div;
+  }
+
+  // ─── Drawing ───
+  toggleDrawing(){
+    if(!this.currentBoardId) return;
+    this._drawingMode = !this._drawingMode;
+    const c = this.canvas;
+    const btn = document.getElementById('draw-btn');
+    const panel = document.getElementById('draw-panel');
+    if(this._drawingMode){
+      c.isDrawingMode = true;
+      c.freeDrawingBrush = new fabric.PencilBrush(c);
+      c.freeDrawingBrush.color = this._drawColor;
+      c.freeDrawingBrush.width = this._drawSize;
+      btn.classList.add('draw-active');
+      panel.style.display = 'block';
+      this.initDrawColors();
+    } else {
+      c.isDrawingMode = false;
+      btn.classList.remove('draw-active');
+      panel.style.display = 'none';
+    }
+  }
+
+  initDrawColors(){
+    const container = document.getElementById('draw-colors');
+    container.innerHTML = '';
+    COLORS_TEXT.forEach(c=>{
+      const dot = document.createElement('div');
+      dot.className = 'dp-color' + (c.hex===this._drawColor?' active':'');
+      dot.style.background = c.hex;
+      dot.title = c.name;
+      dot.onclick = ()=> this.setDrawColor(c.hex);
+      container.appendChild(dot);
+    });
+  }
+
+  setDrawSize(val){
+    this._drawSize = val;
+    document.getElementById('draw-size-val').textContent = val+'px';
+    if(this.canvas.freeDrawingBrush){
+      this.canvas.freeDrawingBrush.width = val;
+    }
+  }
+
+  setDrawColor(hex){
+    this._drawColor = hex;
+    if(this.canvas.freeDrawingBrush){
+      this.canvas.freeDrawingBrush.color = hex;
+    }
+    document.querySelectorAll('.dp-color').forEach(el=>{
+      el.classList.toggle('active', el.style.background === hex ||
+        el.style.backgroundColor === hex ||
+        this.normalizeColor(el.style.backgroundColor) === hex);
+    });
+  }
+
+  normalizeColor(c){
+    const d = document.createElement('div');
+    d.style.color = c;
+    document.body.appendChild(d);
+    const computed = getComputedStyle(d).color;
+    document.body.removeChild(d);
+    const m = computed.match(/\d+/g);
+    if(m && m.length>=3) return '#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');
+    return c;
   }
 
   // ─── Toolbar ───
