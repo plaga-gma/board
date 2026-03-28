@@ -160,10 +160,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div id="empty-label">Selecciona o crea un board para comenzar</div>
   <div id="toolbar" style="display:none">
     <div id="toolbar-panel" style="display:none">
-      <button class="tb-btn tool-active" id="move-btn" title="Mover (V)" onclick="app.setTool('move')"><svg viewBox="0 0 20 20"><path d="M4 16L7 4l4 8 4-3-1 9z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn tool-active" id="move-btn" title="Mover (V)" onclick="app.setTool('move')"><svg viewBox="0 0 20 20"><path d="M10 2l3 4h-2v4h4V8l4 3-4 3v-2h-4v4h2l-3 4-3-4h2v-4H5v2l-4-3 4-3v2h4V6H7l3-4z" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
       <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><polyline points="3,13 7,9 10,11 13,7 17,13"/><circle cx="13" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.setTool('draw')"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
+      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20"><path d="M7 17h10M3.5 13.5l4-4 6-6 3 3-6 6-4 4H4l-2-2 1.5-1z"/><line x1="7.5" y1="9.5" x2="10.5" y2="12.5"/></svg></button>
       <div class="tb-btn-group">
         <button class="tb-btn" id="arrow-btn" title="Flecha (A)" onclick="app.setTool('arrow')" oncontextmenu="event.preventDefault();app.showArrowDropdown(event)"><svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="16" y2="4"/><polyline points="10,4 16,4 16,10"/></svg></button>
         <div class="tb-dropdown-arrow" onclick="app.showArrowDropdown(event)"></div>
@@ -277,6 +278,10 @@ class App {
     this._arrowStart = null;
     this._arrowPreview = null;
     this._spaceHeld = false;
+    this._erasing = false;
+    this._undoStack = [];
+    this._redoStack = [];
+    this._undoLocked = false;
   }
 
   async init(){
@@ -377,6 +382,12 @@ class App {
         c.setCursor('grabbing');
         return;
       }
+      // Eraser tool: click/drag to erase pencil strokes
+      if(e.button===0 && this._activeTool === 'eraser'){
+        this._erasing = true;
+        this._eraseAtPointer(opt.e);
+        return;
+      }
       // Arrow tool: click to place points
       if(e.button===0 && this._activeTool === 'arrow'){
         const pointer = c.getPointer(e);
@@ -408,6 +419,10 @@ class App {
         this._panStart = {x:e.clientX, y:e.clientY};
         c.requestRenderAll();
       }
+      // Eraser drag
+      if(this._erasing && this._activeTool === 'eraser'){
+        this._eraseAtPointer(opt.e);
+      }
       // Arrow preview
       if(this._activeTool === 'arrow' && this._arrowStart){
         const pointer = c.getPointer(opt.e);
@@ -416,13 +431,14 @@ class App {
     });
 
     c.on('mouse:up', ()=>{
+      if(this._erasing) this._erasing = false;
       if(this._panning){
         this._panning = false;
         if(this._activeTool === 'move'){
           c.selection = true;
           c.defaultCursor = 'default';
           c.setCursor('default');
-        } else if(this._activeTool === 'arrow'){
+        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser'){
           c.defaultCursor = 'crosshair';
           c.setCursor('crosshair');
         }
@@ -479,11 +495,13 @@ class App {
     c.on('path:created', opt=>{
       if(opt.path){
         opt.path.itemId = uuid();
+        opt.path.set({selectable:false, evented:false, hoverCursor:'default'});
       }
     });
 
-    c.on('object:added', ()=> this.updateElementList());
-    c.on('object:removed', ()=> this.updateElementList());
+    c.on('object:added', ()=>{ this.updateElementList(); this._saveUndoState(); });
+    c.on('object:removed', ()=>{ this.updateElementList(); this._saveUndoState(); });
+    c.on('object:modified', ()=>{ this._saveUndoState(); });
 
     c.on('selection:created', opt=> this.highlightElement(opt.selected?.[0]));
     c.on('selection:updated', opt=> this.highlightElement(opt.selected?.[0]));
@@ -498,7 +516,7 @@ class App {
       const editing = this.isTextEditing();
       const ctrl = e.ctrlKey || e.metaKey;
 
-      if(!editing){
+      if(!editing && !ctrl){
         if(e.key==='v'||e.key==='V'){e.preventDefault(); this.setTool('move'); return;}
         if(e.key==='t'||e.key==='T'){e.preventDefault(); this.addText(); return;}
         if(e.key==='i'||e.key==='I'){e.preventDefault(); this.addImage(); return;}
@@ -509,6 +527,8 @@ class App {
         if(e.key==='Delete'||e.key==='Backspace'){this.deleteSelected(); return;}
         if(e.key==='Escape'){e.preventDefault(); this._cancelArrow(); this.setTool('move'); return;}
       }
+      if(ctrl && (e.key==='z'||e.key==='Z') && !e.shiftKey){e.preventDefault(); this.undo(); return;}
+      if(ctrl && ((e.key==='y'||e.key==='Y') || (e.shiftKey && (e.key==='z'||e.key==='Z')))){e.preventDefault(); this.redo(); return;}
       if(ctrl && e.key==='='){e.preventDefault(); this.zoomIn(); return;}
       if(ctrl && e.key==='-'){e.preventDefault(); this.zoomOut(); return;}
       if(ctrl && e.key==='0'){e.preventDefault(); this.zoomReset(); return;}
@@ -688,9 +708,10 @@ class App {
   }
 
   async loadBoardToCanvas(id){
+    this._undoLocked = true;
     this.canvas.clear();
     const board = this.boards[id];
-    if(!board || !board.items) { this.canvas.requestRenderAll(); return; }
+    if(!board || !board.items) { this.canvas.requestRenderAll(); this._undoLocked = false; this._initUndoState(); return; }
 
     // Sort by z-index
     const sorted = [...board.items].sort((a,b)=>(a.z||0)-(b.z||0));
@@ -713,6 +734,8 @@ class App {
     this.updateZoomLabel();
     this.canvas.requestRenderAll();
     this.updateElementList();
+    this._undoLocked = false;
+    this._initUndoState();
   }
 
   loadImageItem(item){
@@ -753,6 +776,7 @@ class App {
       fill: item.fill||'',
       strokeLineCap: 'round', strokeLineJoin: 'round',
       scaleX: item.scaleX||1, scaleY: item.scaleY||1,
+      selectable: false, evented: false, hoverCursor: 'default',
     });
     p.itemId = item.id || uuid();
     this.canvas.add(p);
@@ -1202,6 +1226,52 @@ class App {
     return div;
   }
 
+  // ─── Undo / Redo ───
+  _saveUndoState(){
+    if(this._undoLocked) return;
+    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH']));
+    // Avoid duplicate consecutive states
+    if(this._undoStack.length && this._undoStack[this._undoStack.length-1] === json) return;
+    this._undoStack.push(json);
+    if(this._undoStack.length > 80) this._undoStack.shift(); // limit history
+    this._redoStack = [];
+  }
+
+  _initUndoState(){
+    this._undoStack = [];
+    this._redoStack = [];
+    this._saveUndoState();
+  }
+
+  undo(){
+    if(this._undoStack.length <= 1) return; // need at least 1 state to revert to
+    this._redoStack.push(this._undoStack.pop());
+    const state = this._undoStack[this._undoStack.length - 1];
+    this._loadCanvasState(state);
+  }
+
+  redo(){
+    if(!this._redoStack.length) return;
+    const state = this._redoStack.pop();
+    this._undoStack.push(state);
+    this._loadCanvasState(state);
+  }
+
+  _loadCanvasState(json){
+    this._undoLocked = true;
+    this.canvas.loadFromJSON(json, ()=>{
+      // Re-lock pencil paths (non-arrow paths)
+      this.canvas.getObjects('path').forEach(p=>{
+        if(!p._arrowData){
+          p.set({selectable:false, evented:false, hoverCursor:'default'});
+        }
+      });
+      this.canvas.requestRenderAll();
+      this.updateElementList();
+      this._undoLocked = false;
+    });
+  }
+
   // ─── Tool System ───
   setTool(tool){
     if(!this.currentBoardId && tool !== 'move') return;
@@ -1214,7 +1284,7 @@ class App {
 
     // Activate new tool
     const c = this.canvas;
-    document.querySelectorAll('#move-btn,#draw-btn,#arrow-btn').forEach(b=>b.classList.remove('tool-active'));
+    document.querySelectorAll('#move-btn,#draw-btn,#arrow-btn,#eraser-btn').forEach(b=>b.classList.remove('tool-active'));
 
     if(tool === 'move'){
       c.isDrawingMode = false;
@@ -1235,6 +1305,12 @@ class App {
       c.defaultCursor = 'crosshair';
       c.setCursor('crosshair');
       document.getElementById('arrow-btn').classList.add('tool-active');
+    } else if(tool === 'eraser'){
+      c.isDrawingMode = false;
+      c.selection = false;
+      c.defaultCursor = 'crosshair';
+      c.setCursor('crosshair');
+      document.getElementById('eraser-btn').classList.add('tool-active');
     }
   }
 
@@ -1247,10 +1323,30 @@ class App {
       this._cancelArrow();
       c.selection = true;
       c.defaultCursor = 'default';
+    } else if(tool === 'eraser'){
+      this._erasing = false;
+      c.selection = true;
+      c.defaultCursor = 'default';
     }
   }
 
   toggleDrawing(){ this.setTool(this._activeTool === 'draw' ? 'move' : 'draw'); }
+
+  // ─── Eraser Tool ───
+  _eraseAtPointer(e){
+    const pointer = this.canvas.getPointer(e);
+    const objs = this.canvas.getObjects('path');
+    // Check paths (pencil strokes only, not arrows) near the pointer
+    for(let i = objs.length - 1; i >= 0; i--){
+      const p = objs[i];
+      if(p._arrowData) continue; // skip arrows
+      // Use bounding box + containsPoint for hit test
+      if(p.containsPoint(pointer)){
+        this.canvas.remove(p);
+        return; // erase one at a time per move event
+      }
+    }
+  }
 
   // ─── Arrow Tool ───
   showArrowDropdown(e){
