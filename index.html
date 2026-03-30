@@ -53,6 +53,12 @@
   --text1:#ede9fe;--text2:#a598cc;--text3:#6a5e8a;--border:#3a3460;
   --grid:#262040;
 }
+[data-theme="crimson"]{
+  --bg:#1c1012;--sidebar-bg:#150c0e;--item-bg:#2a1a1e;--item-hover:#3a2428;
+  --item-sel:#4a2e34;--accent:#ef4444;--accent-h:#f87171;--accent-p:#dc2626;
+  --text1:#fde2e2;--text2:#cc8888;--text3:#8a5555;--border:#3a2020;
+  --grid:#2a1518;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text1);
   display:flex;height:100vh;overflow:hidden;user-select:none;}
@@ -78,10 +84,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .tp-theme-bot{height:35%;display:flex;}
 .tp-theme-bot span{flex:1;}
 .tp-theme-label{font-size:8px;color:var(--text2);text-align:center;margin-top:4px;}
-.tp-bg-section{display:flex;gap:8px;align-items:center;}
-.tp-bg-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:8px;padding:8px 14px;
-  color:var(--text1);font-size:11px;font-weight:500;cursor:pointer;flex:1;text-align:center;}
-.tp-bg-btn:hover{background:var(--item-hover);}
 .tp-close{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text3);
   cursor:pointer;font-size:18px;line-height:1;padding:4px;}
 .tp-close:hover{color:var(--text1);}
@@ -111,6 +113,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:8px;}
 .el-item:hover{background:var(--item-hover);}
 .el-item.active{background:var(--item-sel);border-left:3px solid var(--accent);}
+.el-name-input{background:var(--item-bg);border:1px solid var(--accent);border-radius:4px;color:var(--text1);
+  font-size:11px;padding:2px 6px;outline:none;width:100%;font-family:inherit;}
 .el-icon{width:16px;height:16px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .sb-footer{font-size:8px;color:var(--text3);text-align:center;padding:8px;line-height:1.4;}
 .sb-file-actions{display:flex;gap:6px;justify-content:center;padding:0 4px;}
@@ -307,19 +311,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 <div id="theme-panel-overlay" onclick="app.hideThemePanel()"></div>
 <div id="theme-panel">
   <button class="tp-close" onclick="app.hideThemePanel()">&times;</button>
-  <div class="tp-title">Tema y fondo</div>
-  <div class="tp-section">Tema de colores</div>
+  <div class="tp-title">Tema de colores</div>
   <div class="tp-themes" id="tp-themes"></div>
-  <div class="tp-section">Fondo del board</div>
-  <div class="tp-bg-section">
-    <button class="tp-bg-btn" onclick="app.setBgImage()">Elegir imagen</button>
-    <button class="tp-bg-btn" onclick="app.clearBgImage()">Quitar fondo</button>
-  </div>
 </div>
 
 <!-- Hidden file input -->
 <input type="file" id="file-input" accept="image/*" multiple style="display:none">
-<input type="file" id="bg-file-input" accept="image/*" style="display:none">
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -399,7 +396,6 @@ class App {
     this._selectStart = null;
     this._selectRect = null;
     this._fileHandle = null;
-    this._bgImage = null;
     this._undoStack = [];
     this._redoStack = [];
     this._undoLocked = false;
@@ -414,7 +410,6 @@ class App {
     this.setupPaste();
     this.setupResize();
     this.restoreTheme();
-    this.restoreBgImage();
     await this.loadAllBoards();
     this.startAutoSave();
     window.addEventListener('beforeunload', ()=> this.saveCurrentBoard());
@@ -485,10 +480,6 @@ class App {
     // Background behind grid
     ctx.fillStyle = bgColor;
     ctx.fillRect(tl.x-200, tl.y-200, br.x-tl.x+400, br.y-tl.y+400);
-    // Background image
-    if(this._bgImage){
-      ctx.drawImage(this._bgImage, tl.x-200, tl.y-200, br.x-tl.x+400, br.y-tl.y+400);
-    }
     ctx.restore();
   }
 
@@ -906,6 +897,7 @@ class App {
         img._originalDataUrl = src;
         img._origW = img.width;
         img._origH = img.height;
+        if(item.customName) img._customName = item.customName;
         this.canvas.add(img);
         resolve();
       },{crossOrigin:'anonymous'});
@@ -921,6 +913,7 @@ class App {
       textBackgroundColor: (item.bg_color && item.bg_color!=='transparent') ? item.bg_color : '',
     });
     t.itemId = item.id || uuid();
+    if(item.customName) t._customName = item.customName;
     this.canvas.add(t);
   }
 
@@ -935,6 +928,7 @@ class App {
       selectable: false, evented: false, hoverCursor: 'default',
     });
     p.itemId = item.id || uuid();
+    if(item.customName) p._customName = item.customName;
     this.canvas.add(p);
   }
 
@@ -946,6 +940,7 @@ class App {
     if(item.scaleY) arrow.set('scaleY', item.scaleY);
     arrow.set({left: item.x||arrow.left, top: item.y||arrow.top});
     arrow.itemId = item.id || arrow.itemId;
+    if(item.customName) arrow._customName = item.customName;
     arrow.setCoords();
   }
 
@@ -960,7 +955,8 @@ class App {
           x:obj.left, y:obj.top, z:idx,
           width: Math.round(obj.width*obj.scaleX),
           height: Math.round(obj.height*obj.scaleY),
-          image_data: obj._originalDataUrl || ''
+          image_data: obj._originalDataUrl || '',
+          customName: obj._customName || undefined
         });
       } else if(obj.type === 'i-text'){
         items.push({
@@ -969,7 +965,8 @@ class App {
           text: obj.text,
           font_size: obj.fontSize,
           color: obj.fill,
-          bg_color: obj.textBackgroundColor || 'transparent'
+          bg_color: obj.textBackgroundColor || 'transparent',
+          customName: obj._customName || undefined
         });
       } else if(obj.type === 'path' && obj._arrowData){
         items.push({
@@ -979,7 +976,8 @@ class App {
           x1:obj._arrowData.x1, y1:obj._arrowData.y1,
           x2:obj._arrowData.x2, y2:obj._arrowData.y2,
           stroke: obj.stroke, strokeWidth: obj.strokeWidth,
-          scaleX: obj.scaleX, scaleY: obj.scaleY
+          scaleX: obj.scaleX, scaleY: obj.scaleY,
+          customName: obj._customName || undefined
         });
       } else if(obj.type === 'path' && !obj._arrowData){
         if(obj === this._arrowPreview) return; // skip preview
@@ -990,7 +988,8 @@ class App {
           stroke: obj.stroke,
           strokeWidth: obj.strokeWidth,
           scaleX: obj.scaleX, scaleY: obj.scaleY,
-          fill: obj.fill || ''
+          fill: obj.fill || '',
+          customName: obj._customName || undefined
         });
       }
     });
@@ -1270,32 +1269,37 @@ class App {
     list.innerHTML = '';
     const objs = this.canvas.getObjects().slice().sort((a,b)=>(a.top||0)-(b.top||0));
     objs.forEach((obj,i)=>{
+      if(obj._isSelectRect) return;
       const div = document.createElement('div');
       div.className = 'el-item';
       const active = this.canvas.getActiveObject();
       if(active === obj) div.classList.add('active');
 
-      let icon, label;
+      let icon, defaultLabel;
       if(obj.type === 'image'){
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><rect x="2" y="3" width="12" height="10" rx="1"/><polyline points="2,11 5,8 8,10 11,6 14,11"/></svg>';
-        label = 'Imagen '+(i+1);
+        defaultLabel = 'Imagen '+(i+1);
       } else if(obj.type === 'i-text'){
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="5" x2="13" y2="5"/><line x1="8" y1="5" x2="8" y2="13"/></svg>';
         const txt = obj.text.replace(/\n/g,' ');
-        label = txt.length > 15 ? txt.substr(0,15)+'...' : txt;
+        defaultLabel = txt.length > 15 ? txt.substr(0,15)+'...' : txt;
       } else if(obj.type === 'path' && obj._arrowData){
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><line x1="3" y1="13" x2="13" y2="3"/><polyline points="8,3 13,3 13,8"/></svg>';
-        label = 'Flecha '+(i+1);
+        defaultLabel = 'Flecha '+(i+1);
       } else if(obj.type === 'path'){
-        if(obj === this._arrowPreview) return; // skip preview
+        if(obj === this._arrowPreview) return;
         icon = '<svg class="el-icon" viewBox="0 0 16 16"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5L11 2.5z" fill="none"/></svg>';
-        label = 'Dibujo '+(i+1);
+        defaultLabel = 'Dibujo '+(i+1);
       } else return;
 
-      div.innerHTML = icon + '<span>'+label+'</span>';
+      const label = obj._customName || defaultLabel;
+      const span = document.createElement('span');
+      span.textContent = label;
+      div.innerHTML = icon;
+      div.appendChild(span);
+
       div.onclick = ()=>{
         this.canvas.setActiveObject(obj);
-        // Center on object
         const center = obj.getCenterPoint();
         const zoom = this.canvas.getZoom();
         const vpt = this.canvas.viewportTransform;
@@ -1303,8 +1307,37 @@ class App {
         vpt[5] = this.canvas.height/2 - center.y*zoom;
         this.canvas.requestRenderAll();
       };
+      div.ondblclick = (e)=>{
+        e.stopPropagation();
+        this._editElementName(span, obj, defaultLabel);
+      };
       list.appendChild(div);
     });
+  }
+
+  _editElementName(span, obj, defaultLabel){
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = obj._customName || defaultLabel;
+    input.className = 'el-name-input';
+    span.replaceWith(input);
+    input.focus();
+    input.select();
+
+    const finish = ()=>{
+      const val = input.value.trim();
+      if(val && val !== defaultLabel){
+        obj._customName = val;
+      } else {
+        delete obj._customName;
+      }
+      this.updateElementList();
+    };
+    input.onblur = finish;
+    input.onkeydown = e=>{
+      if(e.key === 'Enter'){ e.preventDefault(); input.blur(); }
+      if(e.key === 'Escape'){ input.value = ''; input.blur(); }
+    };
   }
 
   highlightElement(obj){
@@ -1412,7 +1445,7 @@ class App {
   // ─── Undo / Redo ───
   _saveUndoState(){
     if(this._undoLocked) return;
-    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH']));
+    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH','_customName']));
     // Avoid duplicate consecutive states
     if(this._undoStack.length && this._undoStack[this._undoStack.length-1] === json) return;
     this._undoStack.push(json);
@@ -1949,6 +1982,7 @@ class App {
     {id:'sunset', label:'Atardecer', bg:'#1c1410', sidebar:'#18100c', accent:'#f97316'},
     {id:'light', label:'Claro', bg:'#f5f5f5', sidebar:'#e8e8e8', accent:'#6c63ff'},
     {id:'lavender', label:'Lavanda', bg:'#1e1a2e', sidebar:'#171328', accent:'#a78bfa'},
+    {id:'crimson', label:'Carmesí', bg:'#1c1012', sidebar:'#150c0e', accent:'#ef4444'},
   ];
 
   showThemePanel(){
@@ -1996,47 +2030,6 @@ class App {
     if(saved) document.documentElement.setAttribute('data-theme', saved);
   }
 
-  setBgImage(){
-    const input = document.getElementById('bg-file-input');
-    input.value = '';
-    input.onchange = ()=>{
-      const file = input.files[0];
-      if(!file) return;
-      const reader = new FileReader();
-      reader.onload = e=>{
-        const img = new Image();
-        img.onload = ()=>{
-          this._bgImage = img;
-          this._bgImageData = e.target.result;
-          localStorage.setItem('pb_bgImage', e.target.result);
-          this.canvas.requestRenderAll();
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  }
-
-  clearBgImage(){
-    this._bgImage = null;
-    this._bgImageData = null;
-    localStorage.removeItem('pb_bgImage');
-    this.canvas.requestRenderAll();
-  }
-
-  restoreBgImage(){
-    const data = localStorage.getItem('pb_bgImage');
-    if(data){
-      const img = new Image();
-      img.onload = ()=>{
-        this._bgImage = img;
-        this._bgImageData = data;
-        this.canvas.requestRenderAll();
-      };
-      img.src = data;
-    }
-  }
 }
 
 // ═══════════════════════════════════════════════════════════════
