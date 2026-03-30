@@ -1580,12 +1580,33 @@ class App {
     }
 
     const bodyHtml = '<div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Los datos se guardan en IndexedDB del navegador ('+browser+'):</div>'
-      +'<div style="background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:var(--text1);word-break:break-all;font-family:monospace;margin-bottom:10px;">'+path+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);">Base de datos: <b>plagas_board_db</b></div>';
+      +'<div style="background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:var(--text1);word-break:break-all;font-family:monospace;margin-bottom:10px;" id="save-path-text">'+path+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">Base de datos: <b>plagas_board_db</b></div>'
+      +'<div id="save-path-toast" style="display:none;margin-top:8px;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;text-align:center;"></div>';
 
     this.showModal('Ruta de guardado', bodyHtml, [
-      {label:'Copiar ruta', cls:'primary', action:()=>{
+      {label:'Abrir carpeta', cls:'primary', action:()=>{
+        // Try to open via file:// protocol; browsers typically block this from http
+        const filePath = 'file:///' + path.replace(/\\/g,'/');
+        const w = window.open(filePath, '_blank');
+        // If blocked, copy path and show instructions
+        if(!w || w.closed){
+          navigator.clipboard.writeText(path);
+          const toast = document.getElementById('save-path-toast');
+          if(toast){
+            toast.textContent = 'No se pudo abrir. Ruta copiada al portapapeles — pégala en el Explorador de archivos (Win+E).';
+            toast.style.display = 'block';
+          }
+        }
+      }},
+      {label:'Copiar ruta', action:()=>{
         navigator.clipboard.writeText(path);
+        const toast = document.getElementById('save-path-toast');
+        if(toast){
+          toast.textContent = 'Ruta copiada al portapapeles';
+          toast.style.display = 'block';
+          setTimeout(()=>{ toast.style.display = 'none'; }, 2000);
+        }
       }},
       {label:'Cerrar'},
     ]);
