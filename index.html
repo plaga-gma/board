@@ -10,15 +10,81 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
-:root{
+:root,
+[data-theme="dark"]{
   --bg:#1c1c1c;--sidebar-bg:#141414;--item-bg:#252525;--item-hover:#333333;
   --item-sel:#3a3a3a;--accent:#6c63ff;--accent-h:#7f78ff;--accent-p:#5a52e0;
   --text1:#e0e0e0;--text2:#888888;--text3:#555555;--border:#333333;
   --grid:#2a2a2a;
 }
+[data-theme="pastel-pink"]{
+  --bg:#fce4ec;--sidebar-bg:#f8bbd0;--item-bg:#f48fb1;--item-hover:#f06292;
+  --item-sel:#ec407a;--accent:#e91e63;--accent-h:#f06292;--accent-p:#c2185b;
+  --text1:#4a1a2e;--text2:#7b3f55;--text3:#b07188;--border:#f06292;
+  --grid:#f3a4bf;
+}
+[data-theme="ocean"]{
+  --bg:#0d1b2a;--sidebar-bg:#0a1628;--item-bg:#1b2838;--item-hover:#253545;
+  --item-sel:#2e4057;--accent:#0ea5e9;--accent-h:#38bdf8;--accent-p:#0284c7;
+  --text1:#e0f2fe;--text2:#7caccc;--text3:#4a7a9b;--border:#1e3a5f;
+  --grid:#162d44;
+}
+[data-theme="forest"]{
+  --bg:#1a2e1a;--sidebar-bg:#142014;--item-bg:#253825;--item-hover:#2f4a2f;
+  --item-sel:#3a5c3a;--accent:#4ade80;--accent-h:#6ee7a0;--accent-p:#22c55e;
+  --text1:#dcfce7;--text2:#86bc95;--text3:#5a8a68;--border:#2d5a2d;
+  --grid:#243a24;
+}
+[data-theme="sunset"]{
+  --bg:#1c1410;--sidebar-bg:#18100c;--item-bg:#2a1e18;--item-hover:#3a2a20;
+  --item-sel:#4a3628;--accent:#f97316;--accent-h:#fb923c;--accent-p:#ea580c;
+  --text1:#fde8d0;--text2:#c49a72;--text3:#8a6a4a;--border:#3a2a1e;
+  --grid:#2a1e15;
+}
+[data-theme="light"]{
+  --bg:#f5f5f5;--sidebar-bg:#e8e8e8;--item-bg:#ffffff;--item-hover:#eeeeee;
+  --item-sel:#dddddd;--accent:#6c63ff;--accent-h:#7f78ff;--accent-p:#5a52e0;
+  --text1:#222222;--text2:#666666;--text3:#999999;--border:#cccccc;
+  --grid:#d8d8d8;
+}
+[data-theme="lavender"]{
+  --bg:#1e1a2e;--sidebar-bg:#171328;--item-bg:#2a2540;--item-hover:#363050;
+  --item-sel:#423c62;--accent:#a78bfa;--accent-h:#c4b5fd;--accent-p:#8b5cf6;
+  --text1:#ede9fe;--text2:#a598cc;--text3:#6a5e8a;--border:#3a3460;
+  --grid:#262040;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text1);
   display:flex;height:100vh;overflow:hidden;user-select:none;}
+
+/* ─── Theme ─── */
+.sb-theme-row{margin-top:8px;}
+.sb-theme-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;
+  color:var(--text2);font-size:10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;transition:all .15s;}
+.sb-theme-btn:hover{background:var(--item-hover);color:var(--text1);}
+#theme-panel{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--sidebar-bg);
+  border:1px solid var(--border);border-radius:14px;padding:20px;z-index:100;min-width:320px;
+  box-shadow:0 16px 48px rgba(0,0,0,.6);display:none;}
+#theme-panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none;}
+.tp-title{font-size:14px;font-weight:700;color:var(--text1);margin-bottom:14px;}
+.tp-section{font-size:10px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.tp-themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.tp-theme{width:100%;aspect-ratio:1;border-radius:10px;border:2px solid transparent;cursor:pointer;
+  position:relative;overflow:hidden;transition:border-color .15s;}
+.tp-theme:hover{border-color:var(--text3);}
+.tp-theme.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);}
+.tp-theme-inner{width:100%;height:100%;display:flex;flex-direction:column;}
+.tp-theme-top{flex:1;}
+.tp-theme-bot{height:35%;display:flex;}
+.tp-theme-bot span{flex:1;}
+.tp-theme-label{font-size:8px;color:var(--text2);text-align:center;margin-top:4px;}
+.tp-bg-section{display:flex;gap:8px;align-items:center;}
+.tp-bg-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:8px;padding:8px 14px;
+  color:var(--text1);font-size:11px;font-weight:500;cursor:pointer;flex:1;text-align:center;}
+.tp-bg-btn:hover{background:var(--item-hover);}
+.tp-close{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text3);
+  cursor:pointer;font-size:18px;line-height:1;padding:4px;}
+.tp-close:hover{color:var(--text1);}
 
 /* ─── Sidebar ─── */
 #sidebar{width:240px;min-width:240px;background:var(--sidebar-bg);border-right:1px solid var(--border);
@@ -156,6 +222,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div class="sb-header">
     <div class="sb-title">plaga's board</div>
     <div class="sb-sub">Boards infinitos para ideas</div>
+    <div class="sb-theme-row">
+      <button class="sb-theme-btn" onclick="app.showThemePanel()" title="Tema y fondo">
+        <svg viewBox="0 0 16 16" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round"><circle cx="8" cy="8" r="6"/><circle cx="6" cy="6.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="10" cy="6.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="7" cy="10" r="1.2" fill="currentColor" stroke="none"/><circle cx="11" cy="9.5" r="1" fill="currentColor" stroke="none"/></svg>
+        <span>Tema y fondo</span>
+      </button>
+    </div>
   </div>
   <div class="sb-sep"></div>
   <div class="sb-section-hdr"><span>Mis Boards</span><button class="sb-add" onclick="app.promptNewBoard()" title="Nuevo Board (Ctrl+N)">+</button></div>
@@ -186,10 +258,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div id="toolbar" style="display:none">
     <div id="toolbar-panel" style="display:none">
       <button class="tb-btn tool-active" id="move-btn" title="Mover (V)" onclick="app.setTool('move')"><svg viewBox="0 0 20 20"><path d="M10 2l3 4h-2v4h4V8l4 3-4 3v-2h-4v4h2l-3 4-3-4h2v-4H5v2l-4-3 4-3v2h4V6H7l3-4z" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn" id="select-btn" title="Selección rectangular (M)" onclick="app.setTool('select')"><svg viewBox="0 0 20 20" fill="none" stroke-width="1.8"><rect x="3" y="3" width="14" height="14" rx="1" stroke-dasharray="3 2"/></svg></button>
       <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
-      <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><polyline points="3,13 7,9 10,11 13,7 17,13"/><circle cx="13" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg></button>
+      <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20" stroke-width="2"><rect x="2" y="4" width="16" height="12" rx="3"/><polyline points="2,14 7,9 12,14"/><circle cx="13" cy="8" r="2" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.setTool('draw')"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
-      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20"><path d="M5.5 16H17"/><path d="M3.2 13.6L8.4 4.4a1 1 0 0 1 1.4-.3l5 3a1 1 0 0 1 .3 1.4l-5.2 9.2a1 1 0 0 1-1.4.3l-5-3a1 1 0 0 1-.3-1.4z"/><path d="M6 14.5l5.5-9.7"/></svg></button>
+      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20" stroke-width="1.8"><path d="M15.5 4.5l-9 9-2.8 2.8a1.5 1.5 0 0 0 0 2.1l.4.4a1.5 1.5 0 0 0 2.1 0L9 16.1l9-9a2 2 0 0 0 0-2.8l-.7-.7a2 2 0 0 0-2.8 0z"/><line x1="6.5" y1="13.5" x2="12.5" y2="7.5"/><path d="M4 18h5" stroke-linecap="round"/></svg></button>
       <div class="tb-btn-group">
         <button class="tb-btn" id="arrow-btn" title="Flecha (A)" onclick="app.setTool('arrow')" oncontextmenu="event.preventDefault();app.showArrowDropdown(event)"><svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="16" y2="4"/><polyline points="10,4 16,4 16,10"/></svg></button>
         <div class="tb-dropdown-arrow" onclick="app.showArrowDropdown(event)"></div>
@@ -230,8 +303,23 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div id="modal"><div id="modal-title"></div><div id="modal-body"></div><div id="modal-actions"></div></div>
 </div>
 
+<!-- ═══ Theme Panel ═══ -->
+<div id="theme-panel-overlay" onclick="app.hideThemePanel()"></div>
+<div id="theme-panel">
+  <button class="tp-close" onclick="app.hideThemePanel()">&times;</button>
+  <div class="tp-title">Tema y fondo</div>
+  <div class="tp-section">Tema de colores</div>
+  <div class="tp-themes" id="tp-themes"></div>
+  <div class="tp-section">Fondo del board</div>
+  <div class="tp-bg-section">
+    <button class="tp-bg-btn" onclick="app.setBgImage()">Elegir imagen</button>
+    <button class="tp-bg-btn" onclick="app.clearBgImage()">Quitar fondo</button>
+  </div>
+</div>
+
 <!-- Hidden file input -->
 <input type="file" id="file-input" accept="image/*" multiple style="display:none">
+<input type="file" id="bg-file-input" accept="image/*" style="display:none">
 
 <script>
 // ═══════════════════════════════════════════════════════════════
@@ -307,7 +395,11 @@ class App {
     this._arrowPreview = null;
     this._spaceHeld = false;
     this._erasing = false;
+    this._selecting = false;
+    this._selectStart = null;
+    this._selectRect = null;
     this._fileHandle = null;
+    this._bgImage = null;
     this._undoStack = [];
     this._redoStack = [];
     this._undoLocked = false;
@@ -321,6 +413,8 @@ class App {
     this.setupDragDrop();
     this.setupPaste();
     this.setupResize();
+    this.restoreTheme();
+    this.restoreBgImage();
     await this.loadAllBoards();
     this.startAutoSave();
     window.addEventListener('beforeunload', ()=> this.saveCurrentBoard());
@@ -376,7 +470,11 @@ class App {
     const sx = Math.floor(tl.x/spacing)*spacing;
     const sy = Math.floor(tl.y/spacing)*spacing;
 
-    ctx.fillStyle = '#2a2a2a';
+    const styles = getComputedStyle(document.documentElement);
+    const gridColor = styles.getPropertyValue('--grid').trim();
+    const bgColor = styles.getPropertyValue('--bg').trim();
+
+    ctx.fillStyle = gridColor;
     for(let x=sx; x<=br.x; x+=spacing){
       for(let y=sy; y<=br.y; y+=spacing){
         ctx.beginPath();
@@ -385,8 +483,12 @@ class App {
       }
     }
     // Background behind grid
-    ctx.fillStyle = '#1c1c1c';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(tl.x-200, tl.y-200, br.x-tl.x+400, br.y-tl.y+400);
+    // Background image
+    if(this._bgImage){
+      ctx.drawImage(this._bgImage, tl.x-200, tl.y-200, br.x-tl.x+400, br.y-tl.y+400);
+    }
     ctx.restore();
   }
 
@@ -412,6 +514,15 @@ class App {
         c.selection = false;
         c.defaultCursor = 'grabbing';
         c.setCursor('grabbing');
+        return;
+      }
+      // Select tool: drag to draw selection rectangle
+      if(e.button===0 && this._activeTool === 'select'){
+        this._selecting = true;
+        this._selectStart = c.getPointer(e);
+        this._removeSelectRect();
+        c.discardActiveObject();
+        c.requestRenderAll();
         return;
       }
       // Eraser tool: click/drag to erase pencil strokes
@@ -451,6 +562,11 @@ class App {
         this._panStart = {x:e.clientX, y:e.clientY};
         c.requestRenderAll();
       }
+      // Select drag — draw dashed rectangle
+      if(this._selecting && this._activeTool === 'select' && this._selectStart){
+        const pointer = c.getPointer(opt.e);
+        this._updateSelectRect(this._selectStart, pointer);
+      }
       // Eraser drag
       if(this._erasing && this._activeTool === 'eraser'){
         this._eraseAtPointer(opt.e);
@@ -464,13 +580,18 @@ class App {
 
     c.on('mouse:up', ()=>{
       if(this._erasing) this._erasing = false;
+      // Finish selection rectangle
+      if(this._selecting && this._activeTool === 'select'){
+        this._selecting = false;
+        this._finishSelectRect();
+      }
       if(this._panning){
         this._panning = false;
         if(this._activeTool === 'move'){
           c.selection = true;
           c.defaultCursor = 'default';
           c.setCursor('default');
-        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser'){
+        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser' || this._activeTool === 'select'){
           c.defaultCursor = 'crosshair';
           c.setCursor('crosshair');
         }
@@ -531,8 +652,8 @@ class App {
       }
     });
 
-    c.on('object:added', ()=>{ this.updateElementList(); this._saveUndoState(); });
-    c.on('object:removed', ()=>{ this.updateElementList(); this._saveUndoState(); });
+    c.on('object:added', opt=>{ if(opt.target?._isSelectRect) return; this.updateElementList(); this._saveUndoState(); });
+    c.on('object:removed', opt=>{ if(opt.target?._isSelectRect) return; this.updateElementList(); this._saveUndoState(); });
     c.on('object:modified', ()=>{ this._saveUndoState(); });
 
     c.on('selection:created', opt=> this.highlightElement(opt.selected?.[0]));
@@ -550,6 +671,7 @@ class App {
 
       if(!editing && !ctrl){
         if(e.key==='v'||e.key==='V'){e.preventDefault(); this.setTool('move'); return;}
+        if(e.key==='m'||e.key==='M'){e.preventDefault(); this.setTool('select'); return;}
         if(e.key==='t'||e.key==='T'){e.preventDefault(); this.addText(); return;}
         if(e.key==='i'||e.key==='I'){e.preventDefault(); this.addImage(); return;}
         if(e.key==='e'||e.key==='E'){e.preventDefault(); this.promptExport(); return;}
@@ -587,7 +709,7 @@ class App {
         } else if(this._activeTool === 'draw'){
           this.canvas.isDrawingMode = true;
           this.canvas.defaultCursor = 'crosshair';
-        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser'){
+        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser' || this._activeTool === 'select'){
           this.canvas.defaultCursor = 'crosshair';
           this.canvas.setCursor('crosshair');
         }
@@ -831,6 +953,7 @@ class App {
   serializeItems(){
     const items = [];
     this.canvas.getObjects().forEach((obj,idx)=>{
+      if(obj._isSelectRect) return; // skip selection rect
       if(obj.type === 'image'){
         items.push({
           type:'image', id: obj.itemId||uuid(),
@@ -1085,7 +1208,7 @@ class App {
     const ctx = exportCanvas.getContext('2d');
 
     // Fill background
-    ctx.fillStyle = '#1c1c1c';
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
     ctx.fillRect(0,0,exportCanvas.width,exportCanvas.height);
 
     // Draw each object
@@ -1344,13 +1467,19 @@ class App {
 
     // Activate new tool
     const c = this.canvas;
-    document.querySelectorAll('#move-btn,#draw-btn,#arrow-btn,#eraser-btn').forEach(b=>b.classList.remove('tool-active'));
+    document.querySelectorAll('#move-btn,#select-btn,#draw-btn,#arrow-btn,#eraser-btn').forEach(b=>b.classList.remove('tool-active'));
 
     if(tool === 'move'){
       c.isDrawingMode = false;
       c.selection = true;
       c.defaultCursor = 'default';
       document.getElementById('move-btn').classList.add('tool-active');
+    } else if(tool === 'select'){
+      c.isDrawingMode = false;
+      c.selection = false;
+      c.defaultCursor = 'crosshair';
+      c.setCursor('crosshair');
+      document.getElementById('select-btn').classList.add('tool-active');
     } else if(tool === 'draw'){
       c.isDrawingMode = true;
       c.freeDrawingBrush = new fabric.PencilBrush(c);
@@ -1387,6 +1516,11 @@ class App {
       this._erasing = false;
       c.selection = true;
       c.defaultCursor = 'default';
+    } else if(tool === 'select'){
+      this._selecting = false;
+      this._removeSelectRect();
+      c.selection = true;
+      c.defaultCursor = 'default';
     }
   }
 
@@ -1405,6 +1539,58 @@ class App {
         this.canvas.remove(p);
         return; // erase one at a time per move event
       }
+    }
+  }
+
+  // ─── Selection Tool ───
+  _updateSelectRect(start, end){
+    const left = Math.min(start.x, end.x);
+    const top = Math.min(start.y, end.y);
+    const width = Math.abs(end.x - start.x);
+    const height = Math.abs(end.y - start.y);
+    if(this._selectRect){
+      this._selectRect.set({left, top, width, height});
+      this._selectRect.setCoords();
+    } else {
+      this._selectRect = new fabric.Rect({
+        left, top, width, height,
+        fill: 'rgba(108,99,255,0.08)',
+        stroke: 'rgba(108,99,255,0.7)',
+        strokeWidth: 1,
+        strokeDashArray: [5, 3],
+        selectable: false, evented: false,
+        excludeFromExport: true,
+      });
+      this._selectRect._isSelectRect = true;
+      this.canvas.add(this._selectRect);
+    }
+    this.canvas.requestRenderAll();
+  }
+
+  _removeSelectRect(){
+    if(this._selectRect){
+      this.canvas.remove(this._selectRect);
+      this._selectRect = null;
+    }
+  }
+
+  _finishSelectRect(){
+    if(!this._selectRect || !this._selectStart) return;
+    const rect = this._selectRect.getBoundingRect();
+    const objs = this.canvas.getObjects().filter(o=>{
+      if(o._isSelectRect) return false;
+      if(o === this._arrowPreview) return false;
+      // For locked paths, temporarily check intersection
+      const br = o.getBoundingRect();
+      return br.left < rect.left+rect.width && br.left+br.width > rect.left &&
+             br.top < rect.top+rect.height && br.top+br.height > rect.top;
+    });
+    this._removeSelectRect();
+    this._selectStart = null;
+    if(objs.length > 0){
+      const sel = new fabric.ActiveSelection(objs, {canvas: this.canvas});
+      this.canvas.setActiveObject(sel);
+      this.canvas.requestRenderAll();
     }
   }
 
@@ -1752,6 +1938,104 @@ class App {
   // ─── Auto-save ───
   startAutoSave(){
     this._autoSaveTimer = setInterval(()=> this.saveCurrentBoard(), 10000);
+  }
+
+  // ─── Theme System ───
+  _themes = [
+    {id:'dark', label:'Oscuro', bg:'#1c1c1c', sidebar:'#141414', accent:'#6c63ff'},
+    {id:'pastel-pink', label:'Rosa Pastel', bg:'#fce4ec', sidebar:'#f8bbd0', accent:'#e91e63'},
+    {id:'ocean', label:'Océano', bg:'#0d1b2a', sidebar:'#0a1628', accent:'#0ea5e9'},
+    {id:'forest', label:'Bosque', bg:'#1a2e1a', sidebar:'#142014', accent:'#4ade80'},
+    {id:'sunset', label:'Atardecer', bg:'#1c1410', sidebar:'#18100c', accent:'#f97316'},
+    {id:'light', label:'Claro', bg:'#f5f5f5', sidebar:'#e8e8e8', accent:'#6c63ff'},
+    {id:'lavender', label:'Lavanda', bg:'#1e1a2e', sidebar:'#171328', accent:'#a78bfa'},
+  ];
+
+  showThemePanel(){
+    const container = document.getElementById('tp-themes');
+    container.innerHTML = '';
+    const current = localStorage.getItem('pb_theme') || 'dark';
+    this._themes.forEach(t=>{
+      const div = document.createElement('div');
+      div.className = 'tp-theme' + (t.id === current ? ' active' : '');
+      div.title = t.label;
+      div.innerHTML = '<div class="tp-theme-inner">'
+        +'<div class="tp-theme-top" style="background:'+t.bg+'"></div>'
+        +'<div class="tp-theme-bot"><span style="background:'+t.sidebar+'"></span><span style="background:'+t.accent+'"></span></div>'
+        +'</div>';
+      div.onclick = ()=> this.setTheme(t.id);
+      container.appendChild(div);
+      // Label
+      const lbl = document.createElement('div');
+      lbl.className = 'tp-theme-label';
+      lbl.textContent = t.label;
+      div.insertAdjacentElement('afterend', lbl);
+    });
+    document.getElementById('theme-panel').style.display = 'block';
+    document.getElementById('theme-panel-overlay').style.display = 'block';
+  }
+
+  hideThemePanel(){
+    document.getElementById('theme-panel').style.display = 'none';
+    document.getElementById('theme-panel-overlay').style.display = 'none';
+  }
+
+  setTheme(id){
+    document.documentElement.setAttribute('data-theme', id);
+    localStorage.setItem('pb_theme', id);
+    this.canvas.requestRenderAll();
+    // Refresh theme panel selection
+    document.querySelectorAll('.tp-theme').forEach(el=> el.classList.remove('active'));
+    const idx = this._themes.findIndex(t=>t.id===id);
+    const themes = document.querySelectorAll('.tp-theme');
+    if(themes[idx]) themes[idx].classList.add('active');
+  }
+
+  restoreTheme(){
+    const saved = localStorage.getItem('pb_theme');
+    if(saved) document.documentElement.setAttribute('data-theme', saved);
+  }
+
+  setBgImage(){
+    const input = document.getElementById('bg-file-input');
+    input.value = '';
+    input.onchange = ()=>{
+      const file = input.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = e=>{
+        const img = new Image();
+        img.onload = ()=>{
+          this._bgImage = img;
+          this._bgImageData = e.target.result;
+          localStorage.setItem('pb_bgImage', e.target.result);
+          this.canvas.requestRenderAll();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  }
+
+  clearBgImage(){
+    this._bgImage = null;
+    this._bgImageData = null;
+    localStorage.removeItem('pb_bgImage');
+    this.canvas.requestRenderAll();
+  }
+
+  restoreBgImage(){
+    const data = localStorage.getItem('pb_bgImage');
+    if(data){
+      const img = new Image();
+      img.onload = ()=>{
+        this._bgImage = img;
+        this._bgImageData = data;
+        this.canvas.requestRenderAll();
+      };
+      img.src = data;
+    }
   }
 }
 
