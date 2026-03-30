@@ -47,6 +47,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .el-item.active{background:var(--item-sel);border-left:3px solid var(--accent);}
 .el-icon{width:16px;height:16px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .sb-footer{font-size:8px;color:var(--text3);text-align:center;padding:8px;line-height:1.4;}
+.sb-save-path-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;
+  color:var(--text3);font-size:9px;cursor:pointer;display:inline-flex;align-items:center;}
+.sb-save-path-btn:hover{background:var(--item-hover);color:var(--text2);}
+.sb-save-path-btn:hover svg{stroke:var(--text2);}
 
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar{width:6px;}
@@ -101,6 +105,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 #arrow-dropdown .ctx-item{display:flex;align-items:center;gap:8px;}
 #arrow-dropdown .ctx-item svg{width:18px;height:18px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 #arrow-dropdown .ctx-item.selected{background:var(--item-sel);}
+#zoom-dropdown{position:absolute;right:48px;background:var(--sidebar-bg);border:1px solid var(--border);
+  border-radius:8px;padding:4px;z-index:25;display:none;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,.5);}
+#zoom-dropdown .ctx-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--text1);}
+#zoom-dropdown .ctx-item:hover{background:var(--item-hover);}
+#zoom-dropdown .ctx-item svg{width:16px;height:16px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 
 /* ─── Context Menu ─── */
 #ctx-menu{position:fixed;background:var(--sidebar-bg);border:1px solid var(--border);border-radius:8px;
@@ -151,7 +160,12 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     <span>Elementos del Board</span>
   </div>
   <div id="element-list"></div>
-  <div class="sb-footer">Click derecho para renombrar/eliminar</div>
+  <div class="sb-footer">
+    <div style="margin-bottom:6px">Click derecho para renombrar/eliminar</div>
+    <button class="sb-save-path-btn" onclick="app.showSavePath()" title="Ver ruta de guardado">
+      <svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M2 13V3a1 1 0 0 1 1-1h4l2 2h4a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg><span style="vertical-align:middle">Ruta de guardado</span>
+    </button>
+  </div>
 </div>
 
 <!-- ═══ Canvas Area ═══ -->
@@ -164,7 +178,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
       <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20"><rect x="3" y="4" width="14" height="12" rx="2"/><polyline points="3,13 7,9 10,11 13,7 17,13"/><circle cx="13" cy="7" r="1.5" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.setTool('draw')"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
-      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20"><path d="M7 17h10M3.5 13.5l4-4 6-6 3 3-6 6-4 4H4l-2-2 1.5-1z"/><line x1="7.5" y1="9.5" x2="10.5" y2="12.5"/></svg></button>
+      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20"><path d="M5.5 16H17"/><path d="M3.2 13.6L8.4 4.4a1 1 0 0 1 1.4-.3l5 3a1 1 0 0 1 .3 1.4l-5.2 9.2a1 1 0 0 1-1.4.3l-5-3a1 1 0 0 1-.3-1.4z"/><path d="M6 14.5l5.5-9.7"/></svg></button>
       <div class="tb-btn-group">
         <button class="tb-btn" id="arrow-btn" title="Flecha (A)" onclick="app.setTool('arrow')" oncontextmenu="event.preventDefault();app.showArrowDropdown(event)"><svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="16" y2="4"/><polyline points="10,4 16,4 16,10"/></svg></button>
         <div class="tb-dropdown-arrow" onclick="app.showArrowDropdown(event)"></div>
@@ -172,9 +186,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="tb-btn" title="Exportar (E)" onclick="app.promptExport()"><svg viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="13"/><polyline points="6,7 10,4 14,7"/><polyline points="4,16 4,14"/><line x1="4" y1="16" x2="16" y2="16"/><polyline points="16,16 16,14"/></svg></button>
       <div class="tb-sep"></div>
       <button class="tb-btn" title="Centrar Todo (F)" onclick="app.fitAll()"><svg viewBox="0 0 20 20"><rect x="4" y="4" width="12" height="12" rx="1"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/></svg></button>
-      <button class="tb-btn" title="Alejar (Ctrl+-)" onclick="app.zoomOut()"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/><line x1="6.5" y1="9" x2="11.5" y2="9"/></svg></button>
+      <div class="tb-btn-group">
+        <button class="tb-btn" id="zoom-btn" title="Zoom" onclick="app.showZoomDropdown(event)"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/></svg></button>
+        <div class="tb-dropdown-arrow" onclick="app.showZoomDropdown(event)"></div>
+      </div>
       <div id="zoom-label" onclick="app.zoomReset()" title="Click para resetear zoom">100%</div>
-      <button class="tb-btn" title="Acercar (Ctrl++)" onclick="app.zoomIn()"><svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5"/><line x1="13" y1="13" x2="17" y2="17"/><line x1="6.5" y1="9" x2="11.5" y2="9"/><line x1="9" y1="6.5" x2="9" y2="11.5"/></svg></button>
     </div>
     <button id="fab" onclick="app.toggleToolbar()"><svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/><line x1="10" y1="5" x2="10" y2="15"/></svg></button>
   </div>
@@ -193,6 +209,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 
 <!-- ═══ Arrow Dropdown ═══ -->
 <div id="arrow-dropdown"></div>
+<div id="zoom-dropdown"></div>
 
 <!-- ═══ Context Menu ═══ -->
 <div id="ctx-menu"></div>
@@ -523,6 +540,7 @@ class App {
         if(e.key==='e'||e.key==='E'){e.preventDefault(); this.promptExport(); return;}
         if(e.key==='d'||e.key==='D'){e.preventDefault(); this.setTool('draw'); return;}
         if(e.key==='a'||e.key==='A'){e.preventDefault(); this.setTool('arrow'); return;}
+        if(e.key==='x'||e.key==='X'){e.preventDefault(); this.setTool('eraser'); return;}
         if(e.key==='f'||e.key==='F'){e.preventDefault(); this.fitAll(); return;}
         if(e.key==='Delete'||e.key==='Backspace'){this.deleteSelected(); return;}
         if(e.key==='Escape'){e.preventDefault(); this._cancelArrow(); this.setTool('move'); return;}
@@ -554,7 +572,7 @@ class App {
         } else if(this._activeTool === 'draw'){
           this.canvas.isDrawingMode = true;
           this.canvas.defaultCursor = 'crosshair';
-        } else if(this._activeTool === 'arrow'){
+        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser'){
           this.canvas.defaultCursor = 'crosshair';
           this.canvas.setCursor('crosshair');
         }
@@ -974,6 +992,32 @@ class App {
 
   updateZoomLabel(){
     document.getElementById('zoom-label').textContent = Math.round(this.canvas.getZoom()*100)+'%';
+  }
+
+  showZoomDropdown(e){
+    e.preventDefault(); e.stopPropagation();
+    const dd = document.getElementById('zoom-dropdown');
+    dd.innerHTML = '';
+    const items = [
+      {label:'Acercar', shortcut:'Ctrl++', action:()=>this.zoomIn(), svg:'<svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/><line x1="5" y1="7" x2="9" y2="7"/><line x1="7" y1="5" x2="7" y2="9"/></svg>'},
+      {label:'Alejar', shortcut:'Ctrl+-', action:()=>this.zoomOut(), svg:'<svg viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5"/><line x1="10.5" y1="10.5" x2="14" y2="14"/><line x1="5" y1="7" x2="9" y2="7"/></svg>'},
+      {label:'Resetear zoom', shortcut:'Ctrl+0', action:()=>this.zoomReset(), svg:'<svg viewBox="0 0 16 16"><path d="M4 8a4 4 0 1 1 1 3"/><polyline points="2,7 4,10 7,8"/></svg>'},
+    ];
+    items.forEach(t=>{
+      const div = document.createElement('div');
+      div.className = 'ctx-item';
+      div.innerHTML = t.svg+'<span style="flex:1">'+t.label+'</span><span style="font-size:9px;color:var(--text3)">'+t.shortcut+'</span>';
+      div.onclick = ()=>{ dd.style.display='none'; t.action(); };
+      dd.appendChild(div);
+    });
+    const btn = document.getElementById('zoom-btn');
+    const r = btn.getBoundingClientRect();
+    dd.style.display = 'block';
+    dd.style.position = 'fixed';
+    dd.style.left = (r.left - dd.offsetWidth - 8)+'px';
+    dd.style.top = (r.top)+'px';
+    const hide = ev=>{if(!dd.contains(ev.target)){dd.style.display='none';document.removeEventListener('mousedown',hide);}};
+    setTimeout(()=>document.addEventListener('mousedown',hide),0);
   }
 
   getViewportCenter(){
@@ -1518,6 +1562,33 @@ class App {
     fab.innerHTML = this.toolbarExpanded
       ? '<svg viewBox="0 0 20 20"><line x1="5.5" y1="5.5" x2="14.5" y2="14.5"/><line x1="14.5" y1="5.5" x2="5.5" y2="14.5"/></svg>'
       : '<svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/><line x1="10" y1="5" x2="10" y2="15"/></svg>';
+  }
+
+  showSavePath(){
+    // IndexedDB path varies by browser
+    let browser = 'Chrome';
+    const ua = navigator.userAgent;
+    if(ua.includes('Firefox')) browser = 'Firefox';
+    else if(ua.includes('Edg/')) browser = 'Edge';
+
+    let path = '';
+    const origin = location.origin.replace(/[:/]/g,'_');
+    if(browser === 'Chrome' || browser === 'Edge'){
+      path = '%LOCALAPPDATA%\\'+( browser==='Edge'?'Microsoft\\Edge':'Google\\Chrome')+'\\User Data\\Default\\IndexedDB\\'+origin+'.indexeddb.leveldb\\';
+    } else {
+      path = '%APPDATA%\\Mozilla\\Firefox\\Profiles\\<perfil>\\storage\\default\\'+origin+'\\idb\\';
+    }
+
+    const bodyHtml = '<div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Los datos se guardan en IndexedDB del navegador ('+browser+'):</div>'
+      +'<div style="background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:var(--text1);word-break:break-all;font-family:monospace;margin-bottom:10px;">'+path+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);">Base de datos: <b>plagas_board_db</b></div>';
+
+    this.showModal('Ruta de guardado', bodyHtml, [
+      {label:'Copiar ruta', cls:'primary', action:()=>{
+        navigator.clipboard.writeText(path);
+      }},
+      {label:'Cerrar'},
+    ]);
   }
 
   // ─── Modal ───
