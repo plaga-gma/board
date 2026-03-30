@@ -47,8 +47,9 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .el-item.active{background:var(--item-sel);border-left:3px solid var(--accent);}
 .el-icon{width:16px;height:16px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .sb-footer{font-size:8px;color:var(--text3);text-align:center;padding:8px;line-height:1.4;}
-.sb-save-path-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:5px 10px;
-  color:var(--text3);font-size:9px;cursor:pointer;display:inline-flex;align-items:center;}
+.sb-file-actions{display:flex;gap:4px;justify-content:center;}
+.sb-save-path-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;
+  color:var(--text3);font-size:9px;cursor:pointer;display:inline-flex;align-items:center;flex:1;}
 .sb-save-path-btn:hover{background:var(--item-hover);color:var(--text2);}
 .sb-save-path-btn:hover svg{stroke:var(--text2);}
 
@@ -162,9 +163,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div id="element-list"></div>
   <div class="sb-footer">
     <div style="margin-bottom:6px">Click derecho para renombrar/eliminar</div>
-    <button class="sb-save-path-btn" onclick="app.showSavePath()" title="Ver ruta de guardado">
-      <svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M2 13V3a1 1 0 0 1 1-1h4l2 2h4a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/></svg><span style="vertical-align:middle">Ruta de guardado</span>
-    </button>
+    <div class="sb-file-actions">
+      <button class="sb-save-path-btn" onclick="app.saveAsFile()" title="Guardar data en archivo">
+        <svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M13 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h7l3 3v8a1 1 0 0 1-1 1z"/><path d="M10 2v3h3"/><line x1="8" y1="7" x2="8" y2="11"/><polyline points="6,9 8,7 10,9"/></svg><span style="vertical-align:middle">Guardar como</span>
+      </button>
+      <button class="sb-save-path-btn" onclick="app.openFromFile()" title="Abrir archivo de data">
+        <svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M2 13V3a1 1 0 0 1 1-1h4l2 2h4a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/><line x1="8" y1="7" x2="8" y2="11"/><polyline points="6,9 8,11 10,9"/></svg><span style="vertical-align:middle">Abrir archivo</span>
+      </button>
+    </div>
+    <div id="save-file-name" style="display:none;margin-top:4px;font-size:8px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
   </div>
 </div>
 
@@ -296,6 +303,7 @@ class App {
     this._arrowPreview = null;
     this._spaceHeld = false;
     this._erasing = false;
+    this._fileHandle = null;
     this._undoStack = [];
     this._redoStack = [];
     this._undoLocked = false;
@@ -312,6 +320,9 @@ class App {
     await this.loadAllBoards();
     this.startAutoSave();
     window.addEventListener('beforeunload', ()=> this.saveCurrentBoard());
+    // Restore saved filename label
+    const savedName = localStorage.getItem('pb_fileName');
+    if(savedName) this._updateSaveFileLabel(savedName);
   }
 
   // ─── Canvas Init ───
@@ -723,6 +734,7 @@ class App {
     if(!this.currentBoardId || !this.boards[this.currentBoardId]) return;
     this.boards[this.currentBoardId].items = this.serializeItems();
     await this.db.put(this.boards[this.currentBoardId]);
+    if(this._fileHandle) this.saveToFile();
   }
 
   async loadBoardToCanvas(id){
@@ -1564,52 +1576,142 @@ class App {
       : '<svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/><line x1="10" y1="5" x2="10" y2="15"/></svg>';
   }
 
-  showSavePath(){
-    // IndexedDB path varies by browser
-    let browser = 'Chrome';
-    const ua = navigator.userAgent;
-    if(ua.includes('Firefox')) browser = 'Firefox';
-    else if(ua.includes('Edg/')) browser = 'Edge';
-
-    let path = '';
-    const origin = location.origin.replace(/[:/]/g,'_');
-    if(browser === 'Chrome' || browser === 'Edge'){
-      path = '%LOCALAPPDATA%\\'+( browser==='Edge'?'Microsoft\\Edge':'Google\\Chrome')+'\\User Data\\Default\\IndexedDB\\'+origin+'.indexeddb.leveldb\\';
-    } else {
-      path = '%APPDATA%\\Mozilla\\Firefox\\Profiles\\<perfil>\\storage\\default\\'+origin+'\\idb\\';
+  // ─── File Save/Load ───
+  _getExportData(){
+    // Save current board state first
+    if(this.currentBoardId && this.boards[this.currentBoardId]){
+      this.boards[this.currentBoardId].items = this.serializeItems();
     }
+    return JSON.stringify({
+      version: 1,
+      exportedAt: Date.now(),
+      boards: Object.values(this.boards),
+    }, null, 2);
+  }
 
-    const bodyHtml = '<div style="font-size:12px;color:var(--text2);margin-bottom:10px;">Los datos se guardan en IndexedDB del navegador ('+browser+'):</div>'
-      +'<div style="background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:10px;font-size:11px;color:var(--text1);word-break:break-all;font-family:monospace;margin-bottom:10px;" id="save-path-text">'+path+'</div>'
-      +'<div style="font-size:11px;color:var(--text3);">Base de datos: <b>plagas_board_db</b></div>'
-      +'<div id="save-path-toast" style="display:none;margin-top:8px;padding:6px 10px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;text-align:center;"></div>';
+  _updateSaveFileLabel(name){
+    const el = document.getElementById('save-file-name');
+    if(el){
+      el.textContent = name ? '\uD83D\uDCC4 ' + name : '';
+      el.style.display = name ? 'block' : 'none';
+    }
+  }
 
-    this.showModal('Ruta de guardado', bodyHtml, [
-      {label:'Abrir carpeta', cls:'primary', action:()=>{
-        // Try to open via file:// protocol; browsers typically block this from http
-        const filePath = 'file:///' + path.replace(/\\/g,'/');
-        const w = window.open(filePath, '_blank');
-        // If blocked, copy path and show instructions
-        if(!w || w.closed){
-          navigator.clipboard.writeText(path);
-          const toast = document.getElementById('save-path-toast');
-          if(toast){
-            toast.textContent = 'No se pudo abrir. Ruta copiada al portapapeles — pégala en el Explorador de archivos (Win+E).';
-            toast.style.display = 'block';
-          }
-        }
-      }},
-      {label:'Copiar ruta', action:()=>{
-        navigator.clipboard.writeText(path);
-        const toast = document.getElementById('save-path-toast');
-        if(toast){
-          toast.textContent = 'Ruta copiada al portapapeles';
-          toast.style.display = 'block';
-          setTimeout(()=>{ toast.style.display = 'none'; }, 2000);
-        }
-      }},
-      {label:'Cerrar'},
-    ]);
+  async saveAsFile(){
+    const data = this._getExportData();
+    // Try File System Access API (Chrome/Edge)
+    if(window.showSaveFilePicker){
+      try{
+        const handle = await window.showSaveFilePicker({
+          suggestedName: 'plagas_board_data.json',
+          types:[{description:'JSON', accept:{'application/json':['.json']}}],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(data);
+        await writable.close();
+        this._fileHandle = handle;
+        localStorage.setItem('pb_fileName', handle.name);
+        this._updateSaveFileLabel(handle.name);
+        return;
+      }catch(e){
+        if(e.name === 'AbortError') return; // user cancelled
+      }
+    }
+    // Fallback: download
+    const blob = new Blob([data], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'plagas_board_data.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    localStorage.setItem('pb_fileName', a.download);
+    this._updateSaveFileLabel(a.download);
+  }
+
+  async saveToFile(){
+    // Auto-save to existing file handle if available
+    if(!this._fileHandle) return;
+    try{
+      const perm = await this._fileHandle.queryPermission({mode:'readwrite'});
+      if(perm !== 'granted'){
+        const req = await this._fileHandle.requestPermission({mode:'readwrite'});
+        if(req !== 'granted') return;
+      }
+      const data = this._getExportData();
+      const writable = await this._fileHandle.createWritable();
+      await writable.write(data);
+      await writable.close();
+    }catch(e){
+      console.warn('Auto-save to file failed:', e);
+    }
+  }
+
+  async openFromFile(){
+    // Try File System Access API
+    if(window.showOpenFilePicker){
+      try{
+        const [handle] = await window.showOpenFilePicker({
+          types:[{description:'JSON', accept:{'application/json':['.json']}}],
+          multiple: false,
+        });
+        const file = await handle.getFile();
+        const text = await file.text();
+        await this._importData(text);
+        this._fileHandle = handle;
+        localStorage.setItem('pb_fileName', handle.name);
+        this._updateSaveFileLabel(handle.name);
+        return;
+      }catch(e){
+        if(e.name === 'AbortError') return;
+      }
+    }
+    // Fallback: file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async()=>{
+      const file = input.files[0];
+      if(!file) return;
+      const text = await file.text();
+      await this._importData(text);
+      localStorage.setItem('pb_fileName', file.name);
+      this._updateSaveFileLabel(file.name);
+    };
+    input.click();
+  }
+
+  async _importData(jsonText){
+    try{
+      const data = JSON.parse(jsonText);
+      if(!data.boards || !Array.isArray(data.boards)){
+        alert('Archivo no válido: no contiene boards.');
+        return;
+      }
+      // Clear existing boards from DB
+      for(const id of Object.keys(this.boards)){
+        await this.db.del(id);
+      }
+      this.boards = {};
+      this.currentBoardId = null;
+      this.canvas.clear();
+
+      // Load imported boards
+      for(const board of data.boards){
+        this.boards[board.id] = board;
+        await this.db.put(board);
+      }
+      this.updateBoardList();
+      // Select first board
+      const ids = Object.keys(this.boards);
+      if(ids.length > 0) await this.selectBoard(ids[0]);
+      else {
+        document.getElementById('empty-label').style.display = '';
+        document.getElementById('toolbar').style.display = 'none';
+        this.updateElementList();
+      }
+    }catch(e){
+      alert('Error al leer el archivo: ' + e.message);
+    }
   }
 
   // ─── Modal ───
