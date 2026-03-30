@@ -47,11 +47,15 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .el-item.active{background:var(--item-sel);border-left:3px solid var(--accent);}
 .el-icon{width:16px;height:16px;stroke:var(--text1);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
 .sb-footer{font-size:8px;color:var(--text3);text-align:center;padding:8px;line-height:1.4;}
-.sb-file-actions{display:flex;gap:4px;justify-content:center;}
-.sb-save-path-btn{background:var(--item-bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;
-  color:var(--text3);font-size:9px;cursor:pointer;display:inline-flex;align-items:center;flex:1;}
-.sb-save-path-btn:hover{background:var(--item-hover);color:var(--text2);}
-.sb-save-path-btn:hover svg{stroke:var(--text2);}
+.sb-file-actions{display:flex;gap:6px;justify-content:center;padding:0 4px;}
+.sb-save-path-btn{background:var(--accent);border:none;border-radius:8px;padding:8px 10px;
+  color:#fff;font-size:11px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;
+  justify-content:center;flex:1;transition:background .15s;}
+.sb-save-path-btn:hover{background:var(--accent-h);color:#fff;}
+.sb-save-path-btn svg{stroke:#fff !important;}
+.sb-save-path-btn:nth-child(2){background:var(--item-bg);border:1px solid var(--border);color:var(--text1);}
+.sb-save-path-btn:nth-child(2) svg{stroke:var(--text1) !important;}
+.sb-save-path-btn:nth-child(2):hover{background:var(--item-hover);}
 
 /* ─── Scrollbar ─── */
 ::-webkit-scrollbar{width:6px;}
@@ -165,10 +169,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
     <div style="margin-bottom:6px">Click derecho para renombrar/eliminar</div>
     <div class="sb-file-actions">
       <button class="sb-save-path-btn" onclick="app.saveAsFile()" title="Guardar data en archivo">
-        <svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M13 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h7l3 3v8a1 1 0 0 1-1 1z"/><path d="M10 2v3h3"/><line x1="8" y1="7" x2="8" y2="11"/><polyline points="6,9 8,7 10,9"/></svg><span style="vertical-align:middle">Guardar como</span>
+        <svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:5px;flex-shrink:0"><path d="M13 14H3a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1h7l3 3v8a1 1 0 0 1-1 1z"/><path d="M10 2v3h3"/><line x1="8" y1="7" x2="8" y2="11"/><polyline points="6,9 8,7 10,9"/></svg><span>Guardar como</span>
       </button>
       <button class="sb-save-path-btn" onclick="app.openFromFile()" title="Abrir archivo de data">
-        <svg viewBox="0 0 16 16" style="width:12px;height:12px;stroke:var(--text3);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:4px"><path d="M2 13V3a1 1 0 0 1 1-1h4l2 2h4a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/><line x1="8" y1="7" x2="8" y2="11"/><polyline points="6,9 8,11 10,9"/></svg><span style="vertical-align:middle">Abrir archivo</span>
+        <svg viewBox="0 0 16 16" style="width:14px;height:14px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;margin-right:5px;flex-shrink:0"><path d="M2 13V3a1 1 0 0 1 1-1h4l2 2h4a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z"/><line x1="8" y1="7" x2="8" y2="11"/><polyline points="6,9 8,11 10,9"/></svg><span>Abrir archivo</span>
       </button>
     </div>
     <div id="save-file-name" style="display:none;margin-top:4px;font-size:8px;color:var(--accent);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
