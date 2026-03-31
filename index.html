@@ -217,6 +217,35 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .modal-btn:hover{background:var(--item-hover);}
 .modal-btn.primary{background:var(--accent);color:#fff;}
 .modal-btn.primary:hover{background:var(--accent-h);}
+
+/* ─── Tutorial ─── */
+.tut-overlay{position:fixed;inset:0;z-index:300;pointer-events:all;transition:opacity .25s;}
+.tut-spotlight{position:fixed;z-index:301;border-radius:10px;
+  box-shadow:0 0 0 9999px rgba(0,0,0,.72);pointer-events:none;transition:all .35s ease;}
+.tut-tooltip{position:fixed;z-index:302;background:var(--sidebar-bg);border:1px solid var(--accent);
+  border-radius:12px;padding:18px 20px;max-width:310px;min-width:220px;
+  box-shadow:0 8px 32px rgba(0,0,0,.5);color:var(--text1);font-family:'Inter',sans-serif;
+  transition:all .35s ease;animation:tutFadeIn .3s ease;}
+@keyframes tutFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.tut-tooltip-title{font-size:14px;font-weight:700;margin-bottom:6px;color:var(--accent);}
+.tut-tooltip-desc{font-size:12px;line-height:1.5;color:var(--text2);margin-bottom:14px;}
+.tut-tooltip-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.tut-tooltip-steps{font-size:11px;color:var(--text3);}
+.tut-tooltip-btns{display:flex;gap:6px;}
+.tut-btn{padding:6px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:background .15s;}
+.tut-btn-skip{background:transparent;color:var(--text3);}
+.tut-btn-skip:hover{color:var(--text1);}
+.tut-btn-prev{background:var(--item-bg);color:var(--text1);}
+.tut-btn-prev:hover{background:var(--item-hover);}
+.tut-btn-next{background:var(--accent);color:#fff;}
+.tut-btn-next:hover{background:var(--accent-h);}
+.tut-help-btn{position:fixed;bottom:12px;left:12px;z-index:15;width:28px;height:28px;
+  border-radius:50%;background:var(--item-bg);border:1px solid var(--border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  opacity:.5;transition:opacity .2s,background .2s;}
+.tut-help-btn:hover{opacity:1;background:var(--accent);border-color:var(--accent);}
+.tut-help-btn svg{width:14px;height:14px;stroke:var(--text1);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 </style>
 </head>
 <body>
@@ -416,6 +445,7 @@ class App {
     // Restore saved filename label
     const savedName = localStorage.getItem('pb_fileName');
     if(savedName) this._updateSaveFileLabel(savedName);
+    this._checkFirstVisitTutorial();
   }
 
   // ─── Canvas Init ───
@@ -434,12 +464,14 @@ class App {
       fireMiddleClick: true,
     });
 
-    // Selection styles
+    // Selection styles & hover cursors
     fabric.Object.prototype.set({
       borderColor:'#6c63ff', cornerColor:'#6c63ff', cornerStrokeColor:'#ffffff',
       cornerStyle:'circle', cornerSize:10, transparentCorners:false,
       borderScaleFactor:2, padding:4, borderDashArray:[4,4],
+      hoverCursor:'move',
     });
+    this.canvas.moveCursor = 'move';
 
     // Grid drawing
     this.canvas.on('after:render', ()=> this.drawGrid());
@@ -507,8 +539,18 @@ class App {
         c.setCursor('grabbing');
         return;
       }
-      // Select tool: drag to draw selection rectangle
+      // Select tool: if clicking on an already-selected object, auto-switch to move
       if(e.button===0 && this._activeTool === 'select'){
+        const target = c.findTarget(e);
+        const activeObj = c.getActiveObject();
+        if(target && activeObj && (activeObj === target ||
+          (activeObj.type === 'activeSelection' && activeObj.contains(target)))){
+          // Auto-switch to move tool to allow dragging
+          this.setTool('move');
+          // Re-trigger Fabric.js mouse handling on the target
+          c.__onMouseDown(e);
+          return;
+        }
         this._selecting = true;
         this._selectStart = c.getPointer(e);
         this._removeSelectRect();
@@ -553,6 +595,17 @@ class App {
         this._panStart = {x:e.clientX, y:e.clientY};
         c.requestRenderAll();
       }
+      // Select tool: show move cursor when hovering selected objects
+      if(!this._selecting && !this._panning && this._activeTool === 'select'){
+        const target = c.findTarget(opt.e);
+        const activeObj = c.getActiveObject();
+        if(target && activeObj && (activeObj === target ||
+          (activeObj.type === 'activeSelection' && activeObj.contains(target)))){
+          c.setCursor('move');
+        } else {
+          c.setCursor('crosshair');
+        }
+      }
       // Select drag — draw dashed rectangle
       if(this._selecting && this._activeTool === 'select' && this._selectStart){
         const pointer = c.getPointer(opt.e);
@@ -586,6 +639,18 @@ class App {
           c.defaultCursor = 'crosshair';
           c.setCursor('crosshair');
         }
+      }
+    });
+
+    // Double-click to edit text (like Photoshop/Figma)
+    c.on('mouse:dblclick', opt=>{
+      const target = c.findTarget(opt.e);
+      if(target && target.type === 'i-text'){
+        if(this._activeTool !== 'move') this.setTool('move');
+        c.setActiveObject(target);
+        target.enterEditing();
+        target.selectAll();
+        c.requestRenderAll();
       }
     });
 
@@ -2030,6 +2095,131 @@ class App {
     if(saved) document.documentElement.setAttribute('data-theme', saved);
   }
 
+  // ─── Tutorial ───
+  _tutSteps = [
+    { selector: null, title: 'Bienvenido a plaga\'s board', desc: 'Un espacio infinito para tus ideas, dibujos y notas. Te mostraremos las funciones principales en unos pocos pasos.', pos: 'center' },
+    { selector: '.sb-add', title: 'Crear un Board', desc: 'Haz click en el botón "+" para crear un nuevo board. Puedes tener múltiples boards y cambiar entre ellos.', pos: 'right' },
+    { selector: '#toolbar', title: 'Barra de herramientas', desc: 'Aquí encontrarás todas las herramientas: mover, seleccionar, texto, imagen, dibujar, borrador y flechas. Usa el botón flotante "+" para mostrarla u ocultarla.', pos: 'top' },
+    { selector: '#draw-btn', title: 'Dibujo libre', desc: 'Selecciona el lápiz (D) para dibujar libremente. Puedes cambiar el color y grosor del trazo.', pos: 'top' },
+    { selector: '#eraser-btn', title: 'Borrador', desc: 'El borrador (X) elimina trazos de dibujo al pasar sobre ellos.', pos: 'top' },
+    { selector: '#select-btn', title: 'Selección rectangular', desc: 'Dibuja un rectángulo para seleccionar múltiples elementos a la vez (M).', pos: 'top' },
+    { selector: '.sb-el-hdr', title: 'Elementos del Board', desc: 'Aquí verás la lista de todos los elementos. Haz doble click en el nombre para renombrarlo.', pos: 'right' },
+    { selector: '.sb-theme-btn', title: 'Temas de colores', desc: 'Cambia la apariencia de toda la aplicación con distintos temas de colores.', pos: 'right' },
+    { selector: '.sb-file-actions', title: 'Guardar y Abrir', desc: 'Usa "Guardar como" para exportar tus boards a un archivo, y "Abrir archivo" para cargarlos de vuelta.', pos: 'right' },
+    { selector: null, title: '¡Listo!', desc: 'Ya conoces lo básico. Usa Space + arrastrar para navegar el canvas, Ctrl+Z/Y para deshacer/rehacer, y la rueda del mouse para hacer zoom. ¡A crear!', pos: 'center' },
+  ];
+  _tutCurrent = -1;
+
+  startTutorial(){
+    this._tutCurrent = 0;
+    this._showTutStep(0);
+  }
+
+  _showTutStep(idx){
+    const overlay = document.getElementById('tut-overlay');
+    const spot = document.getElementById('tut-spotlight');
+    const tip = document.getElementById('tut-tooltip');
+    if(idx < 0 || idx >= this._tutSteps.length){ this._endTutorial(); return; }
+
+    this._tutCurrent = idx;
+    const step = this._tutSteps[idx];
+    const total = this._tutSteps.length;
+
+    // Show overlay
+    overlay.style.display = 'block';
+    overlay.onclick = ()=>{}; // block clicks
+
+    // Spotlight
+    if(step.selector){
+      const el = document.querySelector(step.selector);
+      if(el){
+        const r = el.getBoundingClientRect();
+        const pad = 6;
+        spot.style.display = 'block';
+        spot.style.left = (r.left - pad) + 'px';
+        spot.style.top = (r.top - pad) + 'px';
+        spot.style.width = (r.width + pad*2) + 'px';
+        spot.style.height = (r.height + pad*2) + 'px';
+      } else { spot.style.display = 'none'; }
+    } else {
+      spot.style.display = 'none';
+    }
+
+    // Build tooltip
+    const isFirst = idx === 0;
+    const isLast = idx === total - 1;
+    tip.innerHTML = `
+      <div class="tut-tooltip-title">${step.title}</div>
+      <div class="tut-tooltip-desc">${step.desc}</div>
+      <div class="tut-tooltip-footer">
+        <span class="tut-tooltip-steps">${idx+1} / ${total}</span>
+        <div class="tut-tooltip-btns">
+          ${isLast ? '' : '<button class="tut-btn tut-btn-skip" onclick="app._endTutorial()">Omitir</button>'}
+          ${isFirst ? '' : '<button class="tut-btn tut-btn-prev" onclick="app._showTutStep(app._tutCurrent-1)">Anterior</button>'}
+          <button class="tut-btn tut-btn-next" onclick="app._showTutStep(app._tutCurrent+1)">${isLast ? 'Empezar' : 'Siguiente'}</button>
+        </div>
+      </div>`;
+    tip.style.display = 'block';
+
+    // Position tooltip
+    this._positionTutTooltip(step, tip);
+  }
+
+  _positionTutTooltip(step, tip){
+    // Reset for measurement
+    tip.style.left = '0px'; tip.style.top = '0px';
+    const tw = tip.offsetWidth;
+    const th = tip.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    if(step.pos === 'center' || !step.selector){
+      tip.style.left = Math.round((vw - tw)/2) + 'px';
+      tip.style.top = Math.round((vh - th)/2) + 'px';
+      return;
+    }
+
+    const el = document.querySelector(step.selector);
+    if(!el){ tip.style.left = Math.round((vw-tw)/2)+'px'; tip.style.top = Math.round((vh-th)/2)+'px'; return; }
+    const r = el.getBoundingClientRect();
+    const gap = 14;
+    let left, top;
+
+    if(step.pos === 'right'){
+      left = r.right + gap;
+      top = r.top + r.height/2 - th/2;
+    } else if(step.pos === 'top'){
+      left = r.left + r.width/2 - tw/2;
+      top = r.top - th - gap;
+    } else if(step.pos === 'bottom'){
+      left = r.left + r.width/2 - tw/2;
+      top = r.bottom + gap;
+    } else if(step.pos === 'left'){
+      left = r.left - tw - gap;
+      top = r.top + r.height/2 - th/2;
+    }
+
+    // Clamp inside viewport
+    left = Math.max(8, Math.min(left, vw - tw - 8));
+    top = Math.max(8, Math.min(top, vh - th - 8));
+    tip.style.left = Math.round(left) + 'px';
+    tip.style.top = Math.round(top) + 'px';
+  }
+
+  _endTutorial(){
+    document.getElementById('tut-overlay').style.display = 'none';
+    document.getElementById('tut-spotlight').style.display = 'none';
+    document.getElementById('tut-tooltip').style.display = 'none';
+    this._tutCurrent = -1;
+    localStorage.setItem('pb_tutorialDone', '1');
+  }
+
+  _checkFirstVisitTutorial(){
+    if(!localStorage.getItem('pb_tutorialDone')){
+      setTimeout(()=> this.startTutorial(), 600);
+    }
+  }
+
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -2038,5 +2228,16 @@ class App {
 const app = new App();
 app.init().catch(e=>console.error('Init error:',e));
 </script>
+
+<!-- ═══ Tutorial Help Button ═══ -->
+<button class="tut-help-btn" onclick="app.startTutorial()" title="Tutorial de uso">
+  <svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M7.5 7.5a2.5 2.5 0 0 1 4.8.8c0 1.7-2.5 2.3-2.5 2.3"/><circle cx="10" cy="14.5" r=".8" fill="currentColor" stroke="none"/></svg>
+</button>
+
+<!-- Tutorial overlay containers (injected dynamically) -->
+<div id="tut-overlay" class="tut-overlay" style="display:none"></div>
+<div id="tut-spotlight" class="tut-spotlight" style="display:none"></div>
+<div id="tut-tooltip" class="tut-tooltip" style="display:none"></div>
+
 </body>
 </html>
