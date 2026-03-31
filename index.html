@@ -168,6 +168,32 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .dp-color{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:border-color .15s;}
 .dp-color:hover{border-color:var(--text2);}
 .dp-color.active{border-color:var(--accent);}
+
+/* Arrow panel — same pattern as draw panel */
+#arrow-panel{position:absolute;bottom:16px;right:76px;background:rgba(20,20,20,0.94);border:1px solid var(--border);
+  border-radius:12px;padding:12px;z-index:20;display:none;width:180px;}
+#arrow-panel label{font-size:11px;color:var(--text2);display:block;margin-bottom:6px;}
+#arrow-panel .dp-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+#arrow-size-slider{flex:1;accent-color:var(--accent);height:4px;}
+#arrow-size-val{font-size:11px;color:var(--text1);min-width:28px;text-align:right;}
+
+/* Text panel */
+#text-panel{position:absolute;bottom:16px;right:76px;background:rgba(20,20,20,0.94);border:1px solid var(--border);
+  border-radius:12px;padding:12px;z-index:20;display:none;width:240px;}
+#text-panel label{font-size:11px;color:var(--text2);display:block;margin-bottom:6px;}
+#text-panel .dp-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+#text-font{width:100%;padding:5px 8px;background:var(--item-bg);border:1px solid var(--border);border-radius:6px;
+  color:var(--text1);font-size:12px;font-family:inherit;outline:none;margin-bottom:10px;cursor:pointer;}
+#text-font:focus{border-color:var(--accent);}
+#text-size-slider{flex:1;accent-color:var(--accent);height:4px;}
+#text-size-val{font-size:11px;color:var(--text1);min-width:28px;text-align:right;}
+.tp-format-row{display:flex;gap:4px;margin-bottom:10px;}
+.tp-fmt-btn{width:30px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--item-bg);
+  color:var(--text1);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-family:'Georgia',serif;transition:background .15s,border-color .15s;}
+.tp-fmt-btn:hover{background:var(--item-hover);}
+.tp-fmt-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
 .tb-btn.tool-active{background:var(--accent) !important;color:#fff;}
 .tb-btn.tool-active svg{stroke:#fff;}
 .tb-btn-group{position:relative;width:40px;height:40px;}
@@ -295,7 +321,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
       <button class="tb-btn" title="Agregar texto (T)" onclick="app.addText()"><svg viewBox="0 0 20 20"><line x1="4" y1="6" x2="16" y2="6"/><line x1="10" y1="6" x2="10" y2="16"/></svg></button>
       <button class="tb-btn" title="Agregar imagen (I)" onclick="app.addImage()"><svg viewBox="0 0 20 20" stroke-width="2"><rect x="2" y="4" width="16" height="12" rx="3"/><polyline points="2,14 7,9 12,14"/><circle cx="13" cy="8" r="2" fill="currentColor" stroke="none"/></svg></button>
       <button class="tb-btn" id="draw-btn" title="Dibujar (D)" onclick="app.setTool('draw')"><svg viewBox="0 0 20 20"><path d="M13.5 3.5l3 3L7 16H4v-3L13.5 3.5z"/><line x1="11" y1="6" x2="14" y2="9"/></svg></button>
-      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20" stroke-width="1.8"><path d="M15.5 4.5l-9 9-2.8 2.8a1.5 1.5 0 0 0 0 2.1l.4.4a1.5 1.5 0 0 0 2.1 0L9 16.1l9-9a2 2 0 0 0 0-2.8l-.7-.7a2 2 0 0 0-2.8 0z"/><line x1="6.5" y1="13.5" x2="12.5" y2="7.5"/><path d="M4 18h5" stroke-linecap="round"/></svg></button>
+      <button class="tb-btn" id="eraser-btn" title="Borrador (X)" onclick="app.setTool('eraser')"><svg viewBox="0 0 20 20" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="16" height="7" rx="1.5" transform="rotate(-30 10 12.5)"/><line x1="9" y1="5.5" x2="5.5" y2="11.5" stroke-dasharray="0"/><line x1="4" y1="17" x2="11" y2="17"/></svg></button>
       <div class="tb-btn-group">
         <button class="tb-btn" id="arrow-btn" title="Flecha (A)" onclick="app.setTool('arrow')" oncontextmenu="event.preventDefault();app.showArrowDropdown(event)"><svg viewBox="0 0 20 20"><line x1="4" y1="16" x2="16" y2="4"/><polyline points="10,4 16,4 16,10"/></svg></button>
         <div class="tb-dropdown-arrow" onclick="app.showArrowDropdown(event)"></div>
@@ -322,6 +348,43 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   </div>
   <label>Color del trazo</label>
   <div class="dp-colors" id="draw-colors"></div>
+</div>
+
+<!-- ═══ Arrow Panel ═══ -->
+<div id="arrow-panel">
+  <label>Grosor de flecha</label>
+  <div class="dp-row">
+    <input type="range" id="arrow-size-slider" min="1" max="12" value="2" oninput="app.setArrowSize(+this.value)">
+    <span id="arrow-size-val">2px</span>
+  </div>
+  <label>Color</label>
+  <div class="dp-colors" id="arrow-colors"></div>
+</div>
+
+<!-- ═══ Text Panel ═══ -->
+<div id="text-panel">
+  <label>Fuente</label>
+  <select id="text-font" onchange="app._setTextProp('fontFamily',this.value)">
+    <option value="Inter">Inter</option>
+    <option value="Arial">Arial</option>
+    <option value="Georgia">Georgia</option>
+    <option value="Courier New">Courier New</option>
+    <option value="Times New Roman">Times New Roman</option>
+    <option value="Verdana">Verdana</option>
+    <option value="Comic Sans MS">Comic Sans MS</option>
+  </select>
+  <label>Tamaño</label>
+  <div class="dp-row">
+    <input type="range" id="text-size-slider" min="8" max="120" value="16" oninput="app._setTextProp('fontSize',+this.value)">
+    <span id="text-size-val">16px</span>
+  </div>
+  <div class="tp-format-row">
+    <button id="text-bold" class="tp-fmt-btn" title="Negrita" onclick="app._toggleTextFormat('bold')"><b>B</b></button>
+    <button id="text-italic" class="tp-fmt-btn" title="Cursiva" onclick="app._toggleTextFormat('italic')"><i>I</i></button>
+    <button id="text-underline" class="tp-fmt-btn" title="Subrayado" onclick="app._toggleTextFormat('underline')"><u>U</u></button>
+  </div>
+  <label>Color</label>
+  <div class="dp-colors" id="text-colors"></div>
 </div>
 
 <!-- ═══ Arrow Dropdown ═══ -->
@@ -417,6 +480,7 @@ class App {
     this._drawColor = '#e0e0e0';
     this._drawSize = 3;
     this._arrowType = 'straight'; // 'straight' | 'curved'
+    this._arrowSize = 2;
     this._arrowStart = null;
     this._arrowPreview = null;
     this._spaceHeld = false;
@@ -653,6 +717,11 @@ class App {
         c.requestRenderAll();
       }
     });
+
+    // Text panel on selection
+    c.on('selection:created', opt=>{ this._onSelectionChange(opt); });
+    c.on('selection:updated', opt=>{ this._onSelectionChange(opt); });
+    c.on('selection:cleared', ()=>{ this._hideTextPanel(); });
 
     // Zoom (scroll wheel)
     c.on('mouse:wheel', opt=>{
@@ -974,7 +1043,10 @@ class App {
       left:item.x||0, top:item.y||0,
       fontSize: item.font_size||16,
       fill: item.color||'#e0e0e0',
-      fontFamily:'Inter',
+      fontFamily: item.fontFamily||'Inter',
+      fontWeight: item.fontWeight||'normal',
+      fontStyle: item.fontStyle||'normal',
+      underline: !!item.underline,
       textBackgroundColor: (item.bg_color && item.bg_color!=='transparent') ? item.bg_color : '',
     });
     t.itemId = item.id || uuid();
@@ -1031,6 +1103,10 @@ class App {
           font_size: obj.fontSize,
           color: obj.fill,
           bg_color: obj.textBackgroundColor || 'transparent',
+          fontFamily: obj.fontFamily || 'Inter',
+          fontWeight: obj.fontWeight || 'normal',
+          fontStyle: obj.fontStyle || 'normal',
+          underline: !!obj.underline,
           customName: obj._customName || undefined
         });
       } else if(obj.type === 'path' && obj._arrowData){
@@ -1592,6 +1668,8 @@ class App {
       c.defaultCursor = 'crosshair';
       c.setCursor('crosshair');
       document.getElementById('arrow-btn').classList.add('tool-active');
+      document.getElementById('arrow-panel').style.display = 'block';
+      this.initArrowColors();
     } else if(tool === 'eraser'){
       c.isDrawingMode = false;
       c.selection = false;
@@ -1610,6 +1688,7 @@ class App {
       this._cancelArrow();
       c.selection = true;
       c.defaultCursor = 'default';
+      document.getElementById('arrow-panel').style.display = 'none';
     } else if(tool === 'eraser'){
       this._erasing = false;
       c.selection = true;
@@ -1760,7 +1839,7 @@ class App {
     }
 
     const arrow = new fabric.Path(pathStr, {
-      stroke: color, strokeWidth: 2, fill: '',
+      stroke: color, strokeWidth: this._arrowSize, fill: '',
       strokeLineCap: 'round', strokeLineJoin: 'round',
       selectable: true, evented: true,
     });
@@ -1801,7 +1880,7 @@ class App {
     }
 
     this._arrowPreview = new fabric.Path(pathStr, {
-      stroke: this._drawColor, strokeWidth: 2, fill: '',
+      stroke: this._drawColor, strokeWidth: this._arrowSize, fill: '',
       strokeLineCap: 'round', strokeLineJoin: 'round',
       strokeDashArray: [6, 4],
       selectable: false, evented: false,
@@ -1841,6 +1920,112 @@ class App {
         el.style.backgroundColor === hex ||
         this.normalizeColor(el.style.backgroundColor) === hex);
     });
+  }
+
+  // ─── Arrow Panel ───
+  initArrowColors(){
+    const container = document.getElementById('arrow-colors');
+    container.innerHTML = '';
+    COLORS_TEXT.forEach(c=>{
+      const dot = document.createElement('div');
+      dot.className = 'dp-color' + (c.hex===this._drawColor?' active':'');
+      dot.style.background = c.hex;
+      dot.title = c.name;
+      dot.onclick = ()=> this.setArrowColor(c.hex);
+      container.appendChild(dot);
+    });
+  }
+
+  setArrowSize(val){
+    this._arrowSize = val;
+    document.getElementById('arrow-size-val').textContent = val+'px';
+  }
+
+  setArrowColor(hex){
+    this._drawColor = hex;
+    document.querySelectorAll('#arrow-colors .dp-color').forEach(el=>{
+      el.classList.toggle('active', this.normalizeColor(el.style.backgroundColor) === hex);
+    });
+    // Also sync draw panel colors
+    document.querySelectorAll('#draw-colors .dp-color').forEach(el=>{
+      el.classList.toggle('active', this.normalizeColor(el.style.backgroundColor) === hex);
+    });
+  }
+
+  // ─── Text Panel ───
+  _onSelectionChange(opt){
+    const sel = this.canvas.getActiveObject();
+    if(sel && sel.type === 'i-text'){
+      this._showTextPanel(sel);
+    } else {
+      this._hideTextPanel();
+    }
+  }
+
+  _showTextPanel(textObj){
+    this._textTarget = textObj;
+    const panel = document.getElementById('text-panel');
+    panel.style.display = 'block';
+    // Sync controls with object
+    document.getElementById('text-font').value = textObj.fontFamily || 'Inter';
+    document.getElementById('text-size-slider').value = textObj.fontSize || 16;
+    document.getElementById('text-size-val').textContent = (textObj.fontSize||16)+'px';
+    document.getElementById('text-bold').classList.toggle('active', textObj.fontWeight === 'bold');
+    document.getElementById('text-italic').classList.toggle('active', textObj.fontStyle === 'italic');
+    document.getElementById('text-underline').classList.toggle('active', !!textObj.underline);
+    this._initTextColors(textObj.fill || '#e0e0e0');
+  }
+
+  _hideTextPanel(){
+    document.getElementById('text-panel').style.display = 'none';
+    this._textTarget = null;
+  }
+
+  _initTextColors(currentColor){
+    const container = document.getElementById('text-colors');
+    container.innerHTML = '';
+    COLORS_TEXT.forEach(c=>{
+      const dot = document.createElement('div');
+      dot.className = 'dp-color' + (c.hex===currentColor?' active':'');
+      dot.style.background = c.hex;
+      dot.title = c.name;
+      dot.onclick = ()=> this._setTextProp('fill', c.hex);
+      container.appendChild(dot);
+    });
+  }
+
+  _setTextProp(prop, val){
+    const t = this._textTarget;
+    if(!t) return;
+    t.set(prop, val);
+    this.canvas.requestRenderAll();
+    // Sync UI
+    if(prop === 'fontSize'){
+      document.getElementById('text-size-val').textContent = val+'px';
+    }
+    if(prop === 'fill'){
+      document.querySelectorAll('#text-colors .dp-color').forEach(el=>{
+        el.classList.toggle('active', this.normalizeColor(el.style.backgroundColor) === val);
+      });
+    }
+    this._saveUndoState();
+  }
+
+  _toggleTextFormat(type){
+    const t = this._textTarget;
+    if(!t) return;
+    if(type === 'bold'){
+      t.set('fontWeight', t.fontWeight === 'bold' ? 'normal' : 'bold');
+      document.getElementById('text-bold').classList.toggle('active', t.fontWeight === 'bold');
+    } else if(type === 'italic'){
+      t.set('fontStyle', t.fontStyle === 'italic' ? 'normal' : 'italic');
+      document.getElementById('text-italic').classList.toggle('active', t.fontStyle === 'italic');
+    } else if(type === 'underline'){
+      t.set('underline', !t.underline);
+      document.getElementById('text-underline').classList.toggle('active', !!t.underline);
+    }
+    this.canvas.requestRenderAll();
+    this._saveUndoState();
   }
 
   normalizeColor(c){
