@@ -484,7 +484,7 @@ class App {
     this._arrowStart = null;
     this._arrowPreview = null;
     this._spaceHeld = false;
-    this._erasing = false;
+    this._eraserSize = 20;
     this._selecting = false;
     this._selectStart = null;
     this._selectRect = null;
@@ -622,12 +622,6 @@ class App {
         c.requestRenderAll();
         return;
       }
-      // Eraser tool: click/drag to erase pencil strokes
-      if(e.button===0 && this._activeTool === 'eraser'){
-        this._erasing = true;
-        this._eraseAtPointer(opt.e);
-        return;
-      }
       // Arrow tool: click to place points
       if(e.button===0 && this._activeTool === 'arrow'){
         const pointer = c.getPointer(e);
@@ -675,10 +669,6 @@ class App {
         const pointer = c.getPointer(opt.e);
         this._updateSelectRect(this._selectStart, pointer);
       }
-      // Eraser drag
-      if(this._erasing && this._activeTool === 'eraser'){
-        this._eraseAtPointer(opt.e);
-      }
       // Arrow preview
       if(this._activeTool === 'arrow' && this._arrowStart){
         const pointer = c.getPointer(opt.e);
@@ -687,7 +677,6 @@ class App {
     });
 
     c.on('mouse:up', ()=>{
-      if(this._erasing) this._erasing = false;
       // Finish selection rectangle
       if(this._selecting && this._activeTool === 'select'){
         this._selecting = false;
@@ -773,7 +762,12 @@ class App {
     c.on('path:created', opt=>{
       if(opt.path){
         opt.path.itemId = uuid();
-        opt.path.set({selectable:false, evented:false, hoverCursor:'default'});
+        if(this._activeTool === 'eraser'){
+          opt.path.set({selectable:false, evented:false, hoverCursor:'default',
+            globalCompositeOperation:'destination-out', _isEraserStroke:true});
+        } else {
+          opt.path.set({selectable:false, evented:false, hoverCursor:'default'});
+        }
       }
     });
 
@@ -821,7 +815,7 @@ class App {
           this._spaceHeld = true;
           this.canvas.defaultCursor = 'grab';
           this.canvas.setCursor('grab');
-          if(this._activeTool === 'draw') this.canvas.isDrawingMode = false;
+          if(this._activeTool === 'draw' || this._activeTool === 'eraser') this.canvas.isDrawingMode = false;
         }
       }
     });
@@ -831,10 +825,10 @@ class App {
         if(this._activeTool === 'move'){
           this.canvas.defaultCursor = 'default';
           this.canvas.setCursor('default');
-        } else if(this._activeTool === 'draw'){
+        } else if(this._activeTool === 'draw' || this._activeTool === 'eraser'){
           this.canvas.isDrawingMode = true;
           this.canvas.defaultCursor = 'crosshair';
-        } else if(this._activeTool === 'arrow' || this._activeTool === 'eraser' || this._activeTool === 'select'){
+        } else if(this._activeTool === 'arrow' || this._activeTool === 'select'){
           this.canvas.defaultCursor = 'crosshair';
           this.canvas.setCursor('crosshair');
         }
@@ -1055,7 +1049,7 @@ class App {
   }
 
   loadPathItem(item){
-    const p = new fabric.Path(item.path, {
+    const opts = {
       left: item.x||0, top: item.y||0,
       stroke: item.stroke||'#e0e0e0',
       strokeWidth: item.strokeWidth||3,
@@ -1063,8 +1057,13 @@ class App {
       strokeLineCap: 'round', strokeLineJoin: 'round',
       scaleX: item.scaleX||1, scaleY: item.scaleY||1,
       selectable: false, evented: false, hoverCursor: 'default',
-    });
+    };
+    if(item.isEraser){
+      opts.globalCompositeOperation = 'destination-out';
+    }
+    const p = new fabric.Path(item.path, opts);
     p.itemId = item.id || uuid();
+    if(item.isEraser) p._isEraserStroke = true;
     if(item.customName) p._customName = item.customName;
     this.canvas.add(p);
   }
@@ -1130,6 +1129,7 @@ class App {
           strokeWidth: obj.strokeWidth,
           scaleX: obj.scaleX, scaleY: obj.scaleY,
           fill: obj.fill || '',
+          isEraser: !!obj._isEraserStroke,
           customName: obj._customName || undefined
         });
       }
@@ -1410,7 +1410,7 @@ class App {
     list.innerHTML = '';
     const objs = this.canvas.getObjects().slice().sort((a,b)=>(a.top||0)-(b.top||0));
     objs.forEach((obj,i)=>{
-      if(obj._isSelectRect) return;
+      if(obj._isSelectRect || obj._isEraserStroke) return;
       const div = document.createElement('div');
       div.className = 'el-item';
       const active = this.canvas.getActiveObject();
@@ -1586,7 +1586,7 @@ class App {
   // ─── Undo / Redo ───
   _saveUndoState(){
     if(this._undoLocked) return;
-    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH','_customName']));
+    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH','_customName','_isEraserStroke']));
     // Avoid duplicate consecutive states
     if(this._undoStack.length && this._undoStack[this._undoStack.length-1] === json) return;
     this._undoStack.push(json);
@@ -1617,10 +1617,11 @@ class App {
   _loadCanvasState(json){
     this._undoLocked = true;
     this.canvas.loadFromJSON(json, ()=>{
-      // Re-lock pencil paths (non-arrow paths)
+      // Re-lock pencil/eraser paths (non-arrow paths)
       this.canvas.getObjects('path').forEach(p=>{
         if(!p._arrowData){
           p.set({selectable:false, evented:false, hoverCursor:'default'});
+          if(p._isEraserStroke) p.set({globalCompositeOperation:'destination-out'});
         }
       });
       this.canvas.requestRenderAll();
@@ -1671,10 +1672,11 @@ class App {
       document.getElementById('arrow-panel').style.display = 'block';
       this.initArrowColors();
     } else if(tool === 'eraser'){
-      c.isDrawingMode = false;
-      c.selection = false;
-      c.defaultCursor = 'crosshair';
-      c.setCursor('crosshair');
+      c.isDrawingMode = true;
+      c.freeDrawingBrush = new fabric.PencilBrush(c);
+      const styles = getComputedStyle(document.documentElement);
+      c.freeDrawingBrush.color = styles.getPropertyValue('--bg').trim() || '#1c1c1c';
+      c.freeDrawingBrush.width = this._eraserSize;
       document.getElementById('eraser-btn').classList.add('tool-active');
     }
   }
@@ -1690,7 +1692,7 @@ class App {
       c.defaultCursor = 'default';
       document.getElementById('arrow-panel').style.display = 'none';
     } else if(tool === 'eraser'){
-      this._erasing = false;
+      c.isDrawingMode = false;
       c.selection = true;
       c.defaultCursor = 'default';
     } else if(tool === 'select'){
@@ -1702,22 +1704,6 @@ class App {
   }
 
   toggleDrawing(){ this.setTool(this._activeTool === 'draw' ? 'move' : 'draw'); }
-
-  // ─── Eraser Tool ───
-  _eraseAtPointer(e){
-    const pointer = this.canvas.getPointer(e);
-    const objs = this.canvas.getObjects('path');
-    // Check paths (pencil strokes only, not arrows) near the pointer
-    for(let i = objs.length - 1; i >= 0; i--){
-      const p = objs[i];
-      if(p._arrowData) continue; // skip arrows
-      // Use bounding box + containsPoint for hit test
-      if(p.containsPoint(pointer)){
-        this.canvas.remove(p);
-        return; // erase one at a time per move event
-      }
-    }
-  }
 
   // ─── Selection Tool ───
   _updateSelectRect(start, end){
