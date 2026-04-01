@@ -622,6 +622,12 @@ class App {
         c.requestRenderAll();
         return;
       }
+      // Eraser tool: start erasing pencil strokes
+      if(e.button===0 && this._activeTool === 'eraser'){
+        this._erasing = true;
+        this._erasePencilAt(opt.e);
+        return;
+      }
       // Arrow tool: click to place points
       if(e.button===0 && this._activeTool === 'arrow'){
         const pointer = c.getPointer(e);
@@ -653,6 +659,10 @@ class App {
         this._panStart = {x:e.clientX, y:e.clientY};
         c.requestRenderAll();
       }
+      // Eraser tool: erase pencil strokes while dragging
+      if(this._erasing && this._activeTool === 'eraser'){
+        this._erasePencilAt(opt.e);
+      }
       // Select tool: show move cursor when hovering selected objects
       if(!this._selecting && !this._panning && this._activeTool === 'select'){
         const target = c.findTarget(opt.e);
@@ -677,6 +687,10 @@ class App {
     });
 
     c.on('mouse:up', ()=>{
+      // Finish eraser
+      if(this._erasing){
+        this._erasing = false;
+      }
       // Finish selection rectangle
       if(this._selecting && this._activeTool === 'select'){
         this._selecting = false;
@@ -762,12 +776,7 @@ class App {
     c.on('path:created', opt=>{
       if(opt.path){
         opt.path.itemId = uuid();
-        if(this._activeTool === 'eraser'){
-          opt.path.set({selectable:false, evented:false, hoverCursor:'default',
-            globalCompositeOperation:'destination-out', _isEraserStroke:true});
-        } else {
-          opt.path.set({selectable:false, evented:false, hoverCursor:'default'});
-        }
+        opt.path.set({selectable:false, evented:false, hoverCursor:'default'});
       }
     });
 
@@ -998,6 +1007,7 @@ class App {
         } else if(item.type === 'text'){
           this.loadTextItem(item);
         } else if(item.type === 'path'){
+          if(item.isEraser) continue; // skip old eraser strokes
           this.loadPathItem(item);
         } else if(item.type === 'arrow'){
           this.loadArrowItem(item);
@@ -1058,12 +1068,8 @@ class App {
       scaleX: item.scaleX||1, scaleY: item.scaleY||1,
       selectable: false, evented: false, hoverCursor: 'default',
     };
-    if(item.isEraser){
-      opts.globalCompositeOperation = 'destination-out';
-    }
     const p = new fabric.Path(item.path, opts);
     p.itemId = item.id || uuid();
-    if(item.isEraser) p._isEraserStroke = true;
     if(item.customName) p._customName = item.customName;
     this.canvas.add(p);
   }
@@ -1129,7 +1135,6 @@ class App {
           strokeWidth: obj.strokeWidth,
           scaleX: obj.scaleX, scaleY: obj.scaleY,
           fill: obj.fill || '',
-          isEraser: !!obj._isEraserStroke,
           customName: obj._customName || undefined
         });
       }
@@ -1410,7 +1415,7 @@ class App {
     list.innerHTML = '';
     const objs = this.canvas.getObjects().slice().sort((a,b)=>(a.top||0)-(b.top||0));
     objs.forEach((obj,i)=>{
-      if(obj._isSelectRect || obj._isEraserStroke) return;
+      if(obj._isSelectRect) return;
       const div = document.createElement('div');
       div.className = 'el-item';
       const active = this.canvas.getActiveObject();
@@ -1586,7 +1591,7 @@ class App {
   // ─── Undo / Redo ───
   _saveUndoState(){
     if(this._undoLocked) return;
-    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH','_customName','_isEraserStroke']));
+    const json = JSON.stringify(this.canvas.toJSON(['itemId','_arrowData','_originalDataUrl','_origW','_origH','_customName']));
     // Avoid duplicate consecutive states
     if(this._undoStack.length && this._undoStack[this._undoStack.length-1] === json) return;
     this._undoStack.push(json);
@@ -1617,11 +1622,10 @@ class App {
   _loadCanvasState(json){
     this._undoLocked = true;
     this.canvas.loadFromJSON(json, ()=>{
-      // Re-lock pencil/eraser paths (non-arrow paths)
+      // Re-lock pencil paths (non-arrow paths)
       this.canvas.getObjects('path').forEach(p=>{
         if(!p._arrowData){
           p.set({selectable:false, evented:false, hoverCursor:'default'});
-          if(p._isEraserStroke) p.set({globalCompositeOperation:'destination-out'});
         }
       });
       this.canvas.requestRenderAll();
@@ -1672,11 +1676,10 @@ class App {
       document.getElementById('arrow-panel').style.display = 'block';
       this.initArrowColors();
     } else if(tool === 'eraser'){
-      c.isDrawingMode = true;
-      c.freeDrawingBrush = new fabric.PencilBrush(c);
-      const styles = getComputedStyle(document.documentElement);
-      c.freeDrawingBrush.color = styles.getPropertyValue('--bg').trim() || '#1c1c1c';
-      c.freeDrawingBrush.width = this._eraserSize;
+      c.isDrawingMode = false;
+      c.selection = false;
+      c.defaultCursor = 'crosshair';
+      c.setCursor('crosshair');
       document.getElementById('eraser-btn').classList.add('tool-active');
     }
   }
@@ -1692,7 +1695,7 @@ class App {
       c.defaultCursor = 'default';
       document.getElementById('arrow-panel').style.display = 'none';
     } else if(tool === 'eraser'){
-      c.isDrawingMode = false;
+      this._erasing = false;
       c.selection = true;
       c.defaultCursor = 'default';
     } else if(tool === 'select'){
@@ -1781,6 +1784,25 @@ class App {
     dd.style.display = 'block';
     const close = ev=>{ if(!dd.contains(ev.target)){ dd.style.display='none'; document.removeEventListener('mousedown',close); }};
     setTimeout(()=>document.addEventListener('mousedown',close),0);
+  }
+
+  _erasePencilAt(e){
+    const pointer = this.canvas.getPointer(e);
+    const r = this._eraserSize / this.canvas.getZoom();
+    const toRemove = [];
+    this.canvas.getObjects().forEach(obj=>{
+      // Only erase pencil paths (not arrows, not select rects, not text, not images)
+      if(obj.type !== 'path' || obj._arrowData || obj._isSelectRect) return;
+      // Compare in logical canvas coords using object center + dimensions
+      const center = obj.getCenterPoint();
+      const hw = (obj.width * (obj.scaleX || 1)) / 2 + r;
+      const hh = (obj.height * (obj.scaleY || 1)) / 2 + r;
+      if(Math.abs(pointer.x - center.x) <= hw && Math.abs(pointer.y - center.y) <= hh){
+        toRemove.push(obj);
+      }
+    });
+    toRemove.forEach(obj=> this.canvas.remove(obj));
+    if(toRemove.length) this.canvas.requestRenderAll();
   }
 
   _cancelArrow(){
